@@ -9,7 +9,7 @@ declare global {
 
 // resolves once pywebview has injected the api
 const ready = new Promise<void>((resolve) => {
-  if (window.pywebview?.api) resolve();
+  if (window.pywebview?.api) return resolve();
   else window.addEventListener("pywebviewready", () => resolve());
 });
 
@@ -19,5 +19,15 @@ export async function call<Returns>(
   ...args: unknown[]
 ): Promise<Returns> {
   await ready;
-  return window.pywebview.api[name](...args) as Promise<Returns>;
+
+  const pythonFunction = window.pywebview.api[name];
+  if (!pythonFunction) throw new Error(`Python method "${name}" not found`);
+
+  try {
+    return (await pythonFunction(...args)) as Returns;
+  } catch (err) {
+    throw new Error(
+      `Python "${name}" failed: ${err instanceof Error ? err.message : err}`,
+    );
+  }
 }

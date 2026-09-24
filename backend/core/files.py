@@ -26,5 +26,3 @@ def list_entries(path: str) -> list[Entry]:
             "modified": info.st_mtime,
         })
     return entries
-
-print(list_entries('/Users/admin/Documents/work'))

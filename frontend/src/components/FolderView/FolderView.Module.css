@@ -1,0 +1,21 @@
+.folderView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  border-bottom: var(--line);
+}

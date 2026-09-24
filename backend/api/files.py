@@ -1,6 +1,19 @@
+import webview
+
+from core.files import  Entry, list_entries
+
 class FilesApi:
     def __init__(self):
         pass
-    
-    def ping(self) -> str:
-        return "pong"
+
+    def select_folder(self) -> str | None:
+        paths = webview.windows[0].create_file_dialog(webview.FileDialog.FOLDER)
+        if paths:
+            return paths[0]
+        else: 
+            return None
+
+    def list_files(self, path: str) -> list[Entry]:
+        return list_entries(path)
+
+
