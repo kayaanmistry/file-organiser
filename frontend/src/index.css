@@ -1,12 +1,22 @@
 :root {
   /* colours */
-  --bg-colour: #ce2121;
-  --text-colur: #6b6375;
-  --accent-colour: #aa3bff;
-  --border-colour: #e5e4e7;
+  --bg-colour: #000000;
+  --text-colour: #7c7c7c;
+  --accent-colour: #ff0000;
+  --border-colour: #ff0000;
+  --hover-colour: rgba(255, 0, 0, 0.3);
 
   /* fonts */
-  --font-size: 1rem;
+  --font-size: 0.75rem;
+
+  /* spacing */
+  --padding: 1rem;
+  --gap: 1rem;
+  --row-gap: 0.5rem;
+  --box-padding: 0.2rem 0.4rem;
+
+  /* line */
+  --line: 0.5px solid var(--border-colour);
 }
 
 *,
@@ -27,6 +37,7 @@ body {
   font-family: var(--font-mono);
   color: var(--text-colour);
   background: var(--bg-colour);
+  font-size: var(--font-size);
 }
 
 h1,
@@ -36,7 +47,10 @@ h4,
 h5,
 h6,
 p {
-  font-family: var(--font-mono);
-  color: var(--text-colour);
-  font-size: var(--font-size);
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
 }

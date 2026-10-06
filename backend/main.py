@@ -1,4 +1,4 @@
-import webview;
+import webview
 
 from api import Api
 

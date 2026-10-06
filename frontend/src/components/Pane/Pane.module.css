@@ -1,0 +1,89 @@
+/* pane */
+
+.pane {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+
+  gap: var(--row-gap);
+  padding: var(--padding);
+
+  border: var(--line);
+
+  overflow: hidden;
+}
+
+/* path bar */
+
+.header {
+  display: flex;
+  align-items: center;
+
+  gap: var(--row-gap);
+}
+
+.path {
+  flex: 1;
+  min-width: 0;
+
+  padding: var(--box-padding);
+
+  border: var(--line);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* grid */
+
+.grid {
+  --columns: minmax(0, 1fr) 5ch 9ch 20ch;
+
+  display: flex;
+  flex-direction: column;
+
+  flex: 1;
+  min-height: 0;
+}
+
+.columnHeaders,
+.row {
+  display: grid;
+  grid-template-columns: var(--columns);
+
+  column-gap: 2rem;
+
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* column headers */
+
+.columnHeaders {
+  border-bottom: var(--line);
+
+  font-weight: bold;
+}
+
+/* body */
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* entry row */
+
+.row {
+  &:hover {
+    background: var(--hover-colour);
+  }
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

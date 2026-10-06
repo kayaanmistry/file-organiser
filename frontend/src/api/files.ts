@@ -1,6 +1,7 @@
 import { call } from "./bridge";
 
 export type Entry = {
+  path: string;
   name: string;
   is_dir: boolean;
   ext: string;
