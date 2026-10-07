@@ -9,5 +9,11 @@ export type Entry = {
   modified: number;
 };
 
-export const selectFolder = () => call<string | null>("select_folder");
-export const listFiles = (path: string) => call<Entry[]>("list_files", path);
+export const selectFolder = () =>
+  call<string | null>({ name: "select_folder" });
+
+export const listFiles = (path: string) =>
+  call<Entry[]>({ name: "list_files", args: [path] });
+
+export const moveFiles = (paths: string[], destination: string) =>
+  call<void>({ name: "move_files", args: [paths, destination] });

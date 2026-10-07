@@ -23,9 +23,33 @@ def list_entries(path: str) -> list[Entry]:
         entries.append({
             "path": str(p),
             "name": p.name,
-            "is_dir": stat.S_ISDIR(info.st_mode),
+            "is_dir": is_dir,
             "ext": "" if is_dir else p.suffix.lower(),
             "size": info.st_size,
             "modified": info.st_mtime,
         })
     return entries
+
+def move_entries(paths: list[str], destination: str) -> None:
+    destination_path = Path(destination)
+
+    # check if direactory exists 
+    if not destination_path.is_dir:
+        raise FileNotFoundError(f"Destination not found: {destination}")
+
+    moves = []
+    for p in paths:
+        source = Path(p)
+        target = destination / p.name
+        moves.append((source , destination))
+
+    # check if source exists and target doesnt already exists in destination
+    for source, target in moves :
+        if not source.exists():
+            raise FileNotFoundError(f"Source not found: {source}")
+        if target.exists():
+            raise FileExistsError(f"Already exists: {target}")
+    
+    for source, target in moves 
+        shutil.moves(source, target)
+

@@ -1,6 +1,6 @@
 import webview
 
-from core.files import  Entry, list_entries
+from core.files import  Entry, list_entries, move_entries
 
 class FilesApi:
     def __init__(self):
@@ -15,5 +15,8 @@ class FilesApi:
 
     def list_files(self, path: str) -> list[Entry]:
         return list_entries(path)
+
+    def move_files(self, paths: list[str], destination: str) -> None:
+        move_entries(paths, destination)
 
 

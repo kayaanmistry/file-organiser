@@ -14,10 +14,15 @@ const ready = new Promise<void>((resolve) => {
 });
 
 // function to call a Python methods
-export async function call<Returns>(
-  name: string,
-  ...args: unknown[]
-): Promise<Returns> {
+type CallProps = {
+  name: string;
+  args?: unknown[];
+};
+
+export async function call<Returns>({
+  name,
+  args = [],
+}: CallProps): Promise<Returns> {
   await ready;
 
   const pythonFunction = window.pywebview.api[name];

@@ -22,7 +22,7 @@ export const Workspace = () => {
     );
   };
 
-  const navigate = async (id: string, path: string) => {
+  const openFolder = async (id: string, path: string) => {
     const entries = await listFiles(path);
     updatePane(id, { path, entries });
   };
@@ -33,7 +33,7 @@ export const Workspace = () => {
         <Pane
           key={pane.id}
           pane={pane}
-          onNavigate={(path) => navigate(pane.id, path)}
+          onOpenFolder={(path) => openFolder(pane.id, path)}
         />
       ))}
     </div>

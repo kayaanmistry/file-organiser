@@ -46,16 +46,16 @@ const EntryRow = ({ entry }: EntryRowProps) => (
 
 type PaneProps = {
   pane: PaneState;
-  onNavigate: (path: string) => void;
+  onOpenFolder: (path: string) => void;
 };
 
-export const Pane = ({ pane, onNavigate }: PaneProps) => {
+export const Pane = ({ pane, onOpenFolder }: PaneProps) => {
   const { path, entries } = pane;
 
   const handleSelect = async () => {
     const selectedPath = await selectFolder();
     if (!selectedPath) return;
-    onNavigate(selectedPath);
+    onOpenFolder(selectedPath);
   };
 
   return (
