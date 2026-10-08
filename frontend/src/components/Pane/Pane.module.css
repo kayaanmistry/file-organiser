@@ -14,6 +14,18 @@
   overflow: hidden;
 }
 
+/* title */
+
+.title {
+  margin: 0;
+  align-self: flex-start;
+  align-self: left;
+
+  color: var(--text-colour);
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
 /* path bar */
 
 .header {
@@ -34,56 +46,4 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* grid */
-
-.grid {
-  --columns: minmax(0, 1fr) 5ch 9ch 20ch;
-
-  display: flex;
-  flex-direction: column;
-
-  flex: 1;
-  min-height: 0;
-}
-
-.columnHeaders,
-.row {
-  display: grid;
-  grid-template-columns: var(--columns);
-
-  column-gap: 2rem;
-
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* column headers */
-
-.columnHeaders {
-  border-bottom: var(--line);
-
-  font-weight: bold;
-}
-
-/* body */
-
-.body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-/* entry row */
-
-.row {
-  &:hover {
-    background: var(--hover-colour);
-  }
-}
-
-.name {
-  overflow: hidden;
-  text-overflow: ellipsis;
 }

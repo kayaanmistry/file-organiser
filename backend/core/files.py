@@ -1,7 +1,9 @@
 import stat
+import shutil
 
 from pathlib import Path
 from typing import TypedDict
+
 
 IGNORED = {".DS_Store", "Thumbs.db", "desktop.ini"}
 
@@ -33,23 +35,23 @@ def list_entries(path: str) -> list[Entry]:
 def move_entries(paths: list[str], destination: str) -> None:
     destination_path = Path(destination)
 
-    # check if direactory exists 
-    if not destination_path.is_dir:
+    # check if directory exists
+    if not destination_path.is_dir():
         raise FileNotFoundError(f"Destination not found: {destination}")
 
     moves = []
     for p in paths:
         source = Path(p)
-        target = destination / p.name
-        moves.append((source , destination))
+        target = destination_path / source.name
+        moves.append((source , target))
 
     # check if source exists and target doesnt already exists in destination
-    for source, target in moves :
+    for source, target in moves:
         if not source.exists():
             raise FileNotFoundError(f"Source not found: {source}")
         if target.exists():
             raise FileExistsError(f"Already exists: {target}")
     
-    for source, target in moves 
-        shutil.moves(source, target)
+    for source, target in moves: 
+        shutil.move(source, target)
 

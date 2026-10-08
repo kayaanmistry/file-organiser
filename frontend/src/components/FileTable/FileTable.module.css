@@ -1,0 +1,61 @@
+/* table */
+
+.table {
+  display: flex;
+  flex-direction: column;
+
+  flex: 1;
+  min-height: 0;
+}
+
+.columnHeaders,
+.row {
+  display: flex;
+
+  white-space: nowrap;
+}
+
+/* column headers */
+
+.columnHeaders {
+  border-bottom: var(--line);
+
+  overflow: hidden;
+  scrollbar-gutter: stable;
+
+  font-weight: bold;
+}
+
+/* body */
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+
+  scrollbar-width: none;
+}
+
+/* entry row */
+
+.row {
+  &:hover {
+    background: var(--hover-colour);
+  }
+
+  &[data-selected="true"] {
+    background: var(--selected-colour);
+    color: var(--selected-text-colour);
+  }
+}
+
+/* cells */
+
+.cell {
+  flex: 1;
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

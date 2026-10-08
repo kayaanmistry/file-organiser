@@ -1,0 +1,25 @@
+.selectedFiles {
+  display: flex;
+  flex-direction: column;
+
+  flex: 1;
+  min-height: 0;
+
+  gap: var(--row-gap);
+
+  padding: var(--padding);
+
+  border: var(--line);
+
+  overflow: hidden;
+}
+
+.title {
+  margin: 0;
+  align-self: flex-start;
+  align-self: left;
+
+  color: var(--text-colour);
+  text-transform: uppercase;
+  font-weight: bold;
+}

@@ -1,6 +1,11 @@
+import type { ReactNode } from "react";
+
 import { selectFolder, type Entry } from "@/api/files";
+
 import { Button } from "@/components/Button/Button";
-import { formatType, formatName, formatDate, formatSize } from "@/utils/format";
+import { FileTable } from "@/components/FileTable/FileTable";
+
+import { DEFAULT_COLUMNS } from "@/components/FileTable/columns";
 
 import styles from "./Pane.module.css";
 
@@ -22,36 +27,23 @@ const PathBar = ({ path, onSelect }: PathBarProps) => (
   </header>
 );
 
-const ColumnHeaders = () => (
-  <div className={styles.columnHeaders}>
-    <span>Name</span>
-    <span>Type</span>
-    <span>Size</span>
-    <span>Modified</span>
-  </div>
-);
-
-type EntryRowProps = {
-  entry: Entry;
-};
-
-const EntryRow = ({ entry }: EntryRowProps) => (
-  <div className={styles.row}>
-    <span className={styles.name}>{formatName(entry.name, entry.ext)}</span>
-    <span>{entry.is_dir ? "folder" : formatType(entry.ext)}</span>
-    <span>{entry.is_dir ? "--" : formatSize(entry.size)}</span>
-    <span>{formatDate(entry.modified)}</span>
-  </div>
-);
-
 type PaneProps = {
+  title: string;
   pane: PaneState;
+  selected: Entry[];
   onOpenFolder: (path: string) => void;
+  onRowClick?: (entry: Entry) => void;
+  children?: ReactNode;
 };
 
-export const Pane = ({ pane, onOpenFolder }: PaneProps) => {
-  const { path, entries } = pane;
-
+export const Pane = ({
+  title,
+  pane,
+  selected,
+  onOpenFolder,
+  onRowClick,
+  children,
+}: PaneProps) => {
   const handleSelect = async () => {
     const selectedPath = await selectFolder();
     if (!selectedPath) return;
@@ -60,15 +52,15 @@ export const Pane = ({ pane, onOpenFolder }: PaneProps) => {
 
   return (
     <section className={styles.pane}>
-      <PathBar path={path} onSelect={handleSelect} />
-      <div className={styles.grid}>
-        <ColumnHeaders />
-        <div className={styles.body}>
-          {entries.map((entry) => (
-            <EntryRow key={entry.path} entry={entry} />
-          ))}
-        </div>
-      </div>
+      <p className={styles.title}>{title}</p>
+      <PathBar path={pane.path} onSelect={handleSelect} />
+      <FileTable
+        entries={pane.entries}
+        columns={DEFAULT_COLUMNS}
+        selected={selected}
+        onRowClick={onRowClick}
+      />
+      {children}
     </section>
   );
 };
