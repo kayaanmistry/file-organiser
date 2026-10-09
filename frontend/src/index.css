@@ -52,8 +52,33 @@ h6,
 p {
 }
 
-button,
-input {
+button {
   font: inherit;
   color: inherit;
+
+  background: none;
+  border: none;
+
+  cursor: pointer;
+
+  &:where(:hover:not(:disabled)) {
+    background: var(--hover-colour);
+  }
+
+  &:where(:disabled) {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+[data-clickable] {
+  cursor: pointer;
+
+  &:hover:not(:has(button:hover)) {
+    background: var(--hover-colour);
+  }
+}
+
+[data-selected="true"] {
+  background: var(--selected-colour);
 }

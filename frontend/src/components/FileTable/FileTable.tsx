@@ -21,11 +21,23 @@ type EntryRowProps = {
   entry: Entry;
   columns: ColumnId[];
   isSelected: boolean;
+  isClickable: boolean;
   onClick: () => void;
 };
 
-const EntryRow = ({ entry, columns, isSelected, onClick }: EntryRowProps) => (
-  <div className={styles.row} data-selected={isSelected} onClick={onClick}>
+const EntryRow = ({
+  entry,
+  columns,
+  isSelected,
+  isClickable,
+  onClick,
+}: EntryRowProps) => (
+  <div
+    className={styles.row}
+    data-clickable={isClickable || undefined}
+    data-selected={isSelected}
+    onClick={onClick}
+  >
     {columns.map((id) => (
       <span key={id} className={styles.cell}>
         {COLUMNS[id].render(entry)}
@@ -56,6 +68,7 @@ export const FileTable = ({
           entry={entry}
           columns={columns}
           isSelected={selected.some((e) => e.path === entry.path)}
+          isClickable={!!onRowClick}
           onClick={() => onRowClick?.(entry)}
         />
       ))}

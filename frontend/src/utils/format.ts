@@ -31,3 +31,10 @@ export const formatSize = (bytes: number) => {
   const decimals = unit === 0 ? 0 : 1;
   return `${size.toFixed(decimals)} ${SIZE_UNITS[unit]}`;
 };
+
+export const formatFolderName = (path: string | null) => {
+  if (!path) return "new";
+
+  const parts = path.split(/[\\/]/);
+  return parts[parts.length - 1];
+};

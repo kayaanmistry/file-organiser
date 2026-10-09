@@ -1,0 +1,10 @@
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  aspect-ratio: 1;
+
+  border: var(--line);
+}

@@ -1,18 +1,5 @@
 .button {
-  background: none;
-
   padding: var(--box-padding);
 
   border: var(--line);
-
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: var(--hover-colour);
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
 }

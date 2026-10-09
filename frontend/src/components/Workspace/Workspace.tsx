@@ -1,61 +1,72 @@
-import { useState } from "react";
-
-import { listFiles, moveFiles, type Entry } from "@/api/files";
+import { moveFiles } from "@/api/files";
 
 import { type PaneState } from "@/components/Pane/Pane";
+
 import { SourcePane } from "@/components/Pane/SourcePane/SourcePane";
 import { DestinationPane } from "@/components/Pane/DestinationPane/DestinationPane";
+import { PaneTabs } from "@/components/PaneTabs/PaneTabs";
 import { SelectedFiles } from "@/components/SelectedFiles/SelectedFiles";
+
+import { useSource } from "@/hooks/useSource";
+import { useDestinations } from "@/hooks/useDestination";
+import { useSelection } from "@/hooks/useSelection";
 
 import styles from "./Workspace.module.css";
 
-const INITIAL_SOURCE: PaneState = { id: "source", path: null, entries: [] };
+type DestinationsProps = {
+  destinations: ReturnType<typeof useDestinations>;
+  canMove: boolean;
+  onMoveHere: (target: PaneState) => void;
+};
 
-const INITIAL_DESTINATIONS: PaneState[] = [
-  { id: "destination-1", path: null, entries: [] },
-  { id: "destination-2", path: null, entries: [] },
-  { id: "destination-3", path: null, entries: [] },
-];
+const Destinations = ({
+  destinations,
+  canMove,
+  onMoveHere,
+}: DestinationsProps) => {
+  const { active } = destinations;
+
+  return (
+    <div className={styles.destinations}>
+      <PaneTabs
+        panes={destinations.panes}
+        activeId={destinations.activeId}
+        onSelect={destinations.setActiveId}
+        onAdd={destinations.add}
+        onRemove={destinations.remove}
+      />
+      <DestinationPane
+        key={active.id}
+        pane={active}
+        canMove={canMove}
+        onOpenFolder={(path) => destinations.open(active.id, path)}
+        onMoveHere={() => onMoveHere(active)}
+      />
+    </div>
+  );
+};
 
 export const Workspace = () => {
-  const [source, setSource] = useState(INITIAL_SOURCE);
-  const [destinations, setDestinations] = useState(INITIAL_DESTINATIONS);
-  const [selected, setSelected] = useState<Entry[]>([]);
+  const source = useSource();
+  const destinations = useDestinations();
+  const selection = useSelection();
 
   const openSource = async (path: string) => {
-    const entries = await listFiles(path);
-    setSource({ ...source, path, entries });
-    setSelected([]);
+    await source.open(path);
+    selection.clear();
   };
 
-  const openDestination = async (id: string, path: string) => {
-    const entries = await listFiles(path);
-    setDestinations((current) =>
-      current.map((pane) =>
-        pane.id === id ? { ...pane, path, entries } : pane,
-      ),
-    );
-  };
-
-  const toggleSelected = (entry: Entry) => {
-    setSelected((current) => {
-      const isSelected = current.some((e) => e.path === entry.path);
-      if (isSelected) return current.filter((e) => e.path !== entry.path);
-      return [...current, entry];
-    });
-  };
-
-  const moveHere = async (destination: PaneState) => {
-    if (!source.path || !destination.path) return;
+  const moveHere = async (target: PaneState) => {
+    if (!source.path || !target.path) return;
 
     await moveFiles(
-      selected.map((e) => e.path),
-      destination.path,
+      selection.entries.map((e) => e.path),
+      target.path,
     );
 
     await Promise.all([
       openSource(source.path),
-      openDestination(destination.id, destination.path),
+      destinations.open(target.id, target.path),
     ]);
   };
 
@@ -64,23 +75,17 @@ export const Workspace = () => {
       <div className={styles.panes}>
         <SourcePane
           pane={source}
-          selected={selected}
+          selected={selection.entries}
           onOpenFolder={openSource}
-          onToggle={toggleSelected}
+          onToggle={selection.toggle}
         />
-        <div className={styles.destinations}>
-          {destinations.map((pane) => (
-            <DestinationPane
-              key={pane.id}
-              pane={pane}
-              canMove={selected.length > 0}
-              onOpenFolder={(path) => openDestination(pane.id, path)}
-              onMoveHere={() => moveHere(pane)}
-            />
-          ))}
-        </div>
+        <Destinations
+          destinations={destinations}
+          canMove={selection.entries.length > 0}
+          onMoveHere={moveHere}
+        />
       </div>
-      <SelectedFiles selected={selected} onRemove={toggleSelected} />
+      <SelectedFiles selected={selection.entries} onRemove={selection.toggle} />
     </div>
   );
 };

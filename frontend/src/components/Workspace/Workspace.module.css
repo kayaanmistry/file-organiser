@@ -28,9 +28,9 @@
 
   min-height: 0;
 
-  gap: var(--gap);
+  gap: var(--row-gap);
 
-  & > * {
+  & > section {
     flex: 1;
     min-height: 0;
   }

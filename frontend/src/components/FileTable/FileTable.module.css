@@ -40,14 +40,6 @@
 /* entry row */
 
 .row {
-  &:hover {
-    background: var(--hover-colour);
-  }
-
-  &[data-selected="true"] {
-    background: var(--selected-colour);
-    color: var(--selected-text-colour);
-  }
 }
 
 /* cells */
