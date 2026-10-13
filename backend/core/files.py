@@ -49,6 +49,8 @@ def move_entries(paths: list[str], destination: str) -> None:
     for source, target in moves:
         if not source.exists():
             raise FileNotFoundError(f"Source not found: {source}")
+        if source.is_dir() and destination_path.is_relative_to(source.resolve()):
+            raise ValueError(f"Cannot move a folder into itself: {source}")
         if target.exists():
             raise FileExistsError(f"Already exists: {target}")
     

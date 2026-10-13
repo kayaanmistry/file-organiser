@@ -10,13 +10,12 @@ const createPane = (): PaneState => ({
   entries: [],
 });
 
-const INITIAL_DESTINATION = createPane();
+export const usePanes = () => {
+  const [initial] = useState(createPane);
+  const [panes, setPanes] = useState([initial]);
+  const [activeId, setActiveId] = useState(initial.id);
 
-export const useDestinations = () => {
-  const [panes, setPanes] = useState([INITIAL_DESTINATION]);
-  const [activeId, setActiveId] = useState(INITIAL_DESTINATION.id);
-
-  // returns active pane
+  // returns activce pane
   const active = panes.find((pane) => pane.id === activeId)!;
 
   const open = async (id: string, path: string) => {
@@ -27,6 +26,13 @@ export const useDestinations = () => {
       ),
     );
   };
+
+  const reload = () =>
+    Promise.all(
+      panes
+        .filter((pane) => pane.path)
+        .map((pane) => open(pane.id, pane.path!)),
+    );
 
   const add = () => {
     const newPane = createPane();
@@ -44,5 +50,5 @@ export const useDestinations = () => {
     if (id === activeId) setActiveId(remaining[Math.max(0, index - 1)].id);
   };
 
-  return { panes, activeId, active, setActiveId, open, add, remove };
+  return { panes, activeId, active, setActiveId, open, reload, add, remove };
 };

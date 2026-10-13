@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 import { selectFolder, type Entry } from "@/api/files";
 
 import { Button } from "@/components/Button/Button";
@@ -27,22 +25,33 @@ const PathBar = ({ path, onSelect }: PathBarProps) => (
   </header>
 );
 
+type ActionBarProps = {
+  canMove: boolean;
+  onMove: () => void;
+};
+
+const ActionBar = ({ canMove, onMove }: ActionBarProps) => (
+  <footer className={styles.actions}>
+    <Button onClick={onMove} disabled={!canMove}>
+      move here
+    </Button>
+  </footer>
+);
+
 type PaneProps = {
-  title: string;
   pane: PaneState;
   selected: Entry[];
   onOpenFolder: (path: string) => void;
-  onRowClick?: (entry: Entry) => void;
-  children?: ReactNode;
+  onToggle: (entry: Entry) => void;
+  onMoveHere: () => void;
 };
 
 export const Pane = ({
-  title,
   pane,
   selected,
   onOpenFolder,
-  onRowClick,
-  children,
+  onToggle,
+  onMoveHere,
 }: PaneProps) => {
   const handleSelect = async () => {
     const selectedPath = await selectFolder();
@@ -52,15 +61,17 @@ export const Pane = ({
 
   return (
     <section className={styles.pane}>
-      <p className={styles.title}>{title}</p>
       <PathBar path={pane.path} onSelect={handleSelect} />
       <FileTable
         entries={pane.entries}
         columns={DEFAULT_COLUMNS}
         selected={selected}
-        onRowClick={onRowClick}
+        onRowClick={onToggle}
       />
-      {children}
+      <ActionBar
+        canMove={selected.length > 0 && !!pane.path}
+        onMove={onMoveHere}
+      />
     </section>
   );
 };

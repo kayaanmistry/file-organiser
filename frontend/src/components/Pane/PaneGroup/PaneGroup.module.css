@@ -1,0 +1,13 @@
+.paneGroup {
+  display: flex;
+  flex-direction: column;
+
+  min-height: 0;
+
+  gap: var(--row-gap);
+
+  & > section {
+    flex: 1;
+    min-height: 0;
+  }
+}
