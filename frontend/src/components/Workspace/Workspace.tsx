@@ -34,11 +34,17 @@ export const Workspace = () => {
             group={group}
             selected={selection.entries}
             onToggle={selection.toggle}
+            onSelectAll={selection.add}
+            onDeselectAll={selection.remove}
             onMoveHere={moveHere}
           />
         ))}
       </div>
-      <SelectedFiles selected={selection.entries} onRemove={selection.toggle} />
+      <SelectedFiles
+        selected={selection.entries}
+        onRemove={selection.toggle}
+        onClear={selection.clear}
+      />
     </div>
   );
 };

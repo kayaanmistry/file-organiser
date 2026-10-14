@@ -10,6 +10,7 @@ IGNORED = {".DS_Store", "Thumbs.db", "desktop.ini"}
 class Entry(TypedDict):
     path: str
     name: str
+    parent: str
     is_dir: bool
     ext: str
     size: int
@@ -25,6 +26,7 @@ def list_entries(path: str) -> list[Entry]:
         entries.append({
             "path": str(p),
             "name": p.name,
+            "parent": str(p.parent),
             "is_dir": is_dir,
             "ext": "" if is_dir else p.suffix.lower(),
             "size": info.st_size,

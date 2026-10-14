@@ -33,7 +33,7 @@ export const formatSize = (bytes: number) => {
 };
 
 export const formatFolderName = (path: string | null) => {
-  if (!path) return "new";
+  if (!path) return "--";
 
   const parts = path.split(/[\\/]/);
   return parts[parts.length - 1];

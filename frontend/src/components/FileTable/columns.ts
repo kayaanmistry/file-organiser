@@ -1,5 +1,11 @@
 import type { Entry } from "@/api/files";
-import { formatType, formatName, formatDate, formatSize } from "@/utils/format";
+import {
+  formatType,
+  formatName,
+  formatDate,
+  formatSize,
+  formatFolderName,
+} from "@/utils/format";
 
 type Column = {
   label: string;
@@ -9,11 +15,22 @@ type Column = {
 export type ColumnId = keyof typeof COLUMNS;
 
 export const DEFAULT_COLUMNS: ColumnId[] = ["name", "type", "size", "modified"];
+export const SELECTED_COLUMNS: ColumnId[] = [
+  "name",
+  "folder",
+  "type",
+  "size",
+  "modified",
+];
 
 export const COLUMNS = {
   name: {
     label: "Name",
     render: (entry) => formatName(entry.name, entry.ext),
+  },
+  folder: {
+    label: "Folder",
+    render: (entry) => formatFolderName(entry.parent),
   },
   type: {
     label: "Type",

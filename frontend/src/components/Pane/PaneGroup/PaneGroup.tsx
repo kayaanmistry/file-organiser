@@ -11,6 +11,8 @@ type PaneGroupProps = {
   group: ReturnType<typeof usePanes>;
   selected: Entry[];
   onToggle: (entry: Entry) => void;
+  onSelectAll: (entries: Entry[]) => void;
+  onDeselectAll: (entries: Entry[]) => void;
   onMoveHere: (target: PaneState) => void;
 };
 
@@ -18,6 +20,8 @@ export const PaneGroup = ({
   group,
   selected,
   onToggle,
+  onSelectAll,
+  onDeselectAll,
   onMoveHere,
 }: PaneGroupProps) => {
   const { active } = group;
@@ -37,6 +41,8 @@ export const PaneGroup = ({
         selected={selected}
         onOpenFolder={(path) => group.open(active.id, path)}
         onToggle={onToggle}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
         onMoveHere={() => onMoveHere(active)}
       />
     </div>

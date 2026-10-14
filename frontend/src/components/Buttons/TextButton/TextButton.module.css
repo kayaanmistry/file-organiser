@@ -1,0 +1,9 @@
+.textButton {
+  padding: var(--box-padding);
+
+  border: var(--line);
+}
+
+.textButton[data-active="true"] {
+  background: var(--hover-colour);
+}

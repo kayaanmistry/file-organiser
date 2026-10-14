@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { listFiles } from "@/api/files";
+import { listFiles, selectFolder } from "@/api/files";
 
 import type { PaneState } from "@/components/Pane/Pane";
 
@@ -34,8 +34,13 @@ export const usePanes = () => {
         .map((pane) => open(pane.id, pane.path!)),
     );
 
-  const add = () => {
-    const newPane = createPane();
+  const add = async () => {
+    const path = await selectFolder();
+    if (!path) return;
+
+    const entries = await listFiles(path);
+    const newPane = { id: crypto.randomUUID(), path, entries };
+
     setPanes((current) => [...current, newPane]);
     setActiveId(newPane.id);
   };

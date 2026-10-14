@@ -3,6 +3,7 @@ import { call } from "./bridge";
 export type Entry = {
   path: string;
   name: string;
+  parent: string;
   is_dir: boolean;
   ext: string;
   size: number;

@@ -5,6 +5,8 @@
   flex-shrink: 0;
 
   aspect-ratio: 1;
+  box-sizing: content-box;
+  padding: var(--box-padding);
 
   border: var(--line);
 }
