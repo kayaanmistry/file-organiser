@@ -1,4 +1,6 @@
 from .files import FilesApi
+from .history import HistoryApi
 
-class Api(FilesApi):
+
+class Api(FilesApi, HistoryApi):
     pass

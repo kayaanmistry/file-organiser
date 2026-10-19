@@ -3,6 +3,7 @@ import type { Entry } from "@/api/files";
 import { TextButton } from "@/components/Buttons/TextButton/TextButton";
 import { FileTable } from "@/components/FileTable/FileTable";
 import { SELECTED_COLUMNS } from "@/components/FileTable/columns";
+import { Toolbar } from "@/components/Toolbar/Toolbar";
 
 import styles from "./SelectedFiles.module.css";
 
@@ -12,11 +13,11 @@ type ActionBarProps = {
 };
 
 const ActionBar = ({ canDeselect, onDeselectAll }: ActionBarProps) => (
-  <footer className={styles.actions}>
+  <Toolbar>
     <TextButton onClick={onDeselectAll} disabled={!canDeselect}>
       clear
     </TextButton>
-  </footer>
+  </Toolbar>
 );
 
 type SelectedFilesProps = {

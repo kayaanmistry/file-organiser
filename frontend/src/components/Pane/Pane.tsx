@@ -3,6 +3,7 @@ import { selectFolder, type Entry } from "@/api/files";
 import { TextButton } from "@/components/Buttons/TextButton/TextButton";
 import { FileTable } from "@/components/FileTable/FileTable";
 import { DEFAULT_COLUMNS } from "@/components/FileTable/columns";
+import { Toolbar } from "@/components/Toolbar/Toolbar";
 
 import { canMoveTo } from "@/utils/move";
 
@@ -28,31 +29,32 @@ const PathBar = ({ path, onSelect }: PathBarProps) => (
 
 type ActionBarProps = {
   canSelect: boolean;
-  allSelected: boolean;
+  canDeselect: boolean;
   canMove: boolean;
-  onToggleAll: () => void;
+  onSelectAll: () => void;
+  onDeselectAll: () => void;
   onMove: () => void;
 };
 
 const ActionBar = ({
   canSelect,
-  allSelected,
+  canDeselect,
   canMove,
-  onToggleAll,
+  onSelectAll,
+  onDeselectAll,
   onMove,
 }: ActionBarProps) => (
-  <footer className={styles.actions}>
-    <TextButton
-      onClick={onToggleAll}
-      disabled={!canSelect}
-      active={allSelected}
-    >
+  <Toolbar>
+    <TextButton onClick={onSelectAll} disabled={!canSelect}>
       select all
+    </TextButton>
+    <TextButton onClick={onDeselectAll} disabled={!canDeselect}>
+      clear
     </TextButton>
     <TextButton onClick={onMove} disabled={!canMove}>
       move here
     </TextButton>
-  </footer>
+  </Toolbar>
 );
 
 type PaneProps = {
@@ -74,18 +76,13 @@ export const Pane = ({
   onDeselectAll,
   onMoveHere,
 }: PaneProps) => {
-  const selectedHere = selected.filter((e) => e.parent === pane.path).length;
-  const allSelected =
-    pane.entries.length > 0 && selectedHere === pane.entries.length;
-
   const handleSelect = async () => {
     const selectedPath = await selectFolder();
     if (!selectedPath) return;
     onOpenFolder(selectedPath);
   };
 
-  const toggleAll = () =>
-    allSelected ? onDeselectAll(pane.entries) : onSelectAll(pane.entries);
+  const selectedHere = selected.filter((e) => e.parent === pane.path).length;
 
   return (
     <section className={styles.pane}>
@@ -97,10 +94,11 @@ export const Pane = ({
         onRowClick={onToggle}
       />
       <ActionBar
-        canSelect={pane.entries.length > 0}
-        allSelected={allSelected}
+        canSelect={selectedHere < pane.entries.length}
+        canDeselect={selectedHere > 0}
         canMove={canMoveTo(selected, pane)}
-        onToggleAll={toggleAll}
+        onSelectAll={() => onSelectAll(pane.entries)}
+        onDeselectAll={() => onDeselectAll(pane.entries)}
         onMove={onMoveHere}
       />
     </section>

@@ -47,13 +47,3 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-/* Action Bar */
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-
-  margin-top: auto;
-  gap: var(--row-gap);
-}

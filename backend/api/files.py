@@ -1,6 +1,7 @@
 import webview
 
-from core.files import  Entry, list_entries, move_entries
+from core.files import  Entry, MoveAction, list_entries
+from core.history import history
 
 class FilesApi:
     def __init__(self):
@@ -17,6 +18,6 @@ class FilesApi:
         return list_entries(path)
 
     def move_files(self, paths: list[str], destination: str) -> None:
-        move_entries(paths, destination)
+        history.run(MoveAction(paths, destination))
 
 
