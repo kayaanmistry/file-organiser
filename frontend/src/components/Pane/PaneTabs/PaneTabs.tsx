@@ -1,5 +1,6 @@
-import { type PaneState } from "@/components/Pane/Pane";
 import { IconButton } from "@/components/Buttons/IconButton/IconButton";
+
+import type { PaneState } from "@/hooks/useGroups";
 
 import { formatFolderName } from "@/utils/format";
 

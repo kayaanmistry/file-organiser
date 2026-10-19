@@ -5,9 +5,13 @@
   min-height: 0;
 
   gap: var(--row-gap);
+}
 
-  & > section {
-    flex: 1;
-    min-height: 0;
-  }
+.top {
+  display: flex;
+  justify-content: space-between;
+
+  min-width: 0;
+
+  gap: var(--row-gap);
 }

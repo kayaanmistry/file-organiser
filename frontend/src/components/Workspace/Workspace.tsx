@@ -1,13 +1,13 @@
 import { moveFiles } from "@/api/files";
 
-import { type PaneState } from "@/components/Pane/Pane";
 import { PaneGroup } from "@/components/Pane/PaneGroup/PaneGroup";
 import { SelectedFiles } from "@/components/SelectedFiles/SelectedFiles";
 import { Toolbar } from "@/components/Toolbar/Toolbar";
 import { TextButton } from "@/components/Buttons/TextButton/TextButton";
 
+import type { PaneState } from "@/hooks/useGroups";
+import { useGroups } from "@/hooks/useGroups";
 import { useHistory } from "@/hooks/useHistory";
-import { usePanes } from "@/hooks/usePanes";
 import { useSelection } from "@/hooks/useSelection";
 
 import styles from "./Workspace.module.css";
@@ -17,10 +17,18 @@ type ActionBarProps = {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  onNewWindow: () => void;
 };
 
-const ActionBar = ({ canUndo, canRedo, onUndo, onRedo }: ActionBarProps) => (
+const ActionBar = ({
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  onNewWindow,
+}: ActionBarProps) => (
   <Toolbar>
+    <TextButton onClick={onNewWindow}>new window</TextButton>
     <TextButton onClick={onUndo} disabled={!canUndo}>
       undo
     </TextButton>
@@ -31,16 +39,12 @@ const ActionBar = ({ canUndo, canRedo, onUndo, onRedo }: ActionBarProps) => (
 );
 
 export const Workspace = () => {
-  const groups = [usePanes(), usePanes()];
+  const workspace = useGroups();
   const selection = useSelection();
-
-  const reloadAll = async () => {
-    await Promise.all(groups.map((group) => group.reload()));
-  };
 
   const history = useHistory(async () => {
     selection.clear();
-    await reloadAll();
+    await workspace.reload();
   });
 
   const moveHere = async (target: PaneState) => {
@@ -52,7 +56,7 @@ export const Workspace = () => {
     );
 
     selection.clear();
-    await reloadAll();
+    await workspace.reload();
     await history.refresh();
   };
 
@@ -63,16 +67,16 @@ export const Workspace = () => {
         canRedo={history.canRedo}
         onUndo={history.undo}
         onRedo={history.redo}
+        onNewWindow={workspace.addGroup}
       />
       <div className={styles.paneGroups}>
-        {groups.map((group, i) => (
+        {workspace.groups.map((group) => (
           <PaneGroup
-            key={i}
+            key={group.id}
             group={group}
-            selected={selection.entries}
-            onToggle={selection.toggle}
-            onSelectAll={selection.add}
-            onDeselectAll={selection.remove}
+            actions={workspace.actionsFor(group.id)}
+            canClose={workspace.canClose}
+            selection={selection}
             onMoveHere={moveHere}
           />
         ))}

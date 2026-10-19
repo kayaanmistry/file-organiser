@@ -5,15 +5,11 @@ import { FileTable } from "@/components/FileTable/FileTable";
 import { DEFAULT_COLUMNS } from "@/components/FileTable/columns";
 import { Toolbar } from "@/components/Toolbar/Toolbar";
 
+import type { PaneState } from "@/hooks/useGroups";
+
 import { canMoveTo } from "@/utils/move";
 
 import styles from "./Pane.module.css";
-
-export type PaneState = {
-  id: string;
-  path: string | null;
-  entries: Entry[];
-};
 
 type PathBarProps = {
   path: string | null;

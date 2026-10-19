@@ -31,3 +31,5 @@ export const useSelection = () => {
 
   return { entries: selected, toggle, add, remove, clear };
 };
+
+export type Selection = ReturnType<typeof useSelection>;
