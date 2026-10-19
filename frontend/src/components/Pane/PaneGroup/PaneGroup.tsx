@@ -2,24 +2,62 @@ import { Pane } from "@/components/Pane/Pane";
 import { PaneTabs } from "@/components/Pane/PaneTabs/PaneTabs";
 import { IconButton } from "@/components/Buttons/IconButton/IconButton";
 
-import type { GroupActions, GroupState } from "@/hooks/useGroups";
-import type { PaneState } from "@/hooks/useGroups";
-import type { Selection } from "@/hooks/useSelection";
+import type { GroupActions, GroupState, PaneState } from "@/hooks/useGroups";
+import type { UseSelectionReturn } from "@/hooks/useSelection";
 
 import styles from "./PaneGroup.module.css";
 
-type PaneGroupProps = {
+type TopBarProps = {
+  number: number;
   group: GroupState;
   actions: GroupActions;
   canClose: boolean;
-  selection: Selection;
+  canMinimise: boolean;
+};
+
+const TopBar = ({
+  number,
+  group,
+  actions,
+  canClose,
+  canMinimise,
+}: TopBarProps) => (
+  <div className={styles.topBar}>
+    <div className={styles.tabsArea}>
+      <span className={styles.number} data-selected>
+        {number}
+      </span>
+      <PaneTabs
+        panes={group.panes}
+        activeId={group.activeId}
+        onSelect={actions.selectPane}
+        onAdd={actions.addPane}
+        onRemove={actions.removePane}
+      />
+    </div>
+    <div className={styles.controls}>
+      <IconButton icon="-" onClick={actions.minimise} disabled={!canMinimise} />
+      <IconButton icon="x" onClick={actions.close} disabled={!canClose} />
+    </div>
+  </div>
+);
+
+type PaneGroupProps = {
+  number: number;
+  group: GroupState;
+  actions: GroupActions;
+  canClose: boolean;
+  canMinimise: boolean;
+  selection: UseSelectionReturn;
   onMoveHere: (target: PaneState) => void;
 };
 
 export const PaneGroup = ({
+  number,
   group,
   actions,
   canClose,
+  canMinimise,
   selection,
   onMoveHere,
 }: PaneGroupProps) => {
@@ -27,16 +65,13 @@ export const PaneGroup = ({
 
   return (
     <div className={styles.paneGroup}>
-      <div className={styles.top}>
-        <PaneTabs
-          panes={group.panes}
-          activeId={group.activeId}
-          onSelect={actions.selectPane}
-          onAdd={actions.addPane}
-          onRemove={actions.removePane}
-        />
-        <IconButton icon="x" onClick={actions.close} disabled={!canClose} />
-      </div>
+      <TopBar
+        number={number}
+        group={group}
+        actions={actions}
+        canClose={canClose}
+        canMinimise={canMinimise}
+      />
       <Pane
         key={active.id}
         pane={active}

@@ -2,6 +2,9 @@ import { useState } from "react";
 
 import { listFiles, selectFolder, type Entry } from "@/api/files";
 
+export const MAX_VISIBLE = 4;
+
+// types
 export type PaneState = {
   id: string;
   path: string | null;
@@ -12,24 +15,32 @@ export type GroupState = {
   id: string;
   panes: PaneState[];
   activeId: string;
+  visible?: boolean;
 };
 
 export type GroupActions = {
   close: () => void;
+  minimise: () => void;
   selectPane: (paneId: string) => void;
   addPane: () => void;
   removePane: (paneId: string) => void;
   openFolder: (paneId: string, path: string) => void;
 };
 
+// create
 const createPane = (
   path: string | null = null,
   entries: Entry[] = [],
 ): PaneState => ({ id: crypto.randomUUID(), path, entries });
 
-const createGroup = (): GroupState => {
+const createGroup = (visible = true): GroupState => {
   const pane = createPane();
-  return { id: crypto.randomUUID(), panes: [pane], activeId: pane.id };
+  return {
+    id: crypto.randomUUID(),
+    panes: [pane],
+    activeId: pane.id,
+    visible,
+  };
 };
 
 export const useGroups = () => {
@@ -39,8 +50,23 @@ export const useGroups = () => {
     setGroups((current) => current.map((g) => (g.id === id ? fn(g) : g)));
 
   // groups
+  const visibleCount = groups.filter((g) => g.visible).length;
 
-  const addGroup = () => setGroups((current) => [...current, createGroup()]);
+  const canToggle = (group: GroupState) =>
+    group.visible ? visibleCount > 1 : visibleCount < MAX_VISIBLE;
+
+  const toggleGroup = (id: string) => {
+    const group = groups.find((g) => g.id === id)!;
+    if (!canToggle(group)) return;
+
+    updateGroup(id, (g) => ({ ...g, visible: !g.visible }));
+  };
+
+  const addGroup = () =>
+    setGroups((current) => {
+      const room = current.filter((g) => g.visible).length < MAX_VISIBLE;
+      return [...current, createGroup(room)];
+    });
 
   const removeGroup = (id: string) =>
     setGroups((current) =>
@@ -48,7 +74,6 @@ export const useGroups = () => {
     );
 
   // panes
-
   const openFolder = async (groupId: string, paneId: string, path: string) => {
     const entries = await listFiles(path);
     updateGroup(groupId, (g) => ({
@@ -95,9 +120,10 @@ export const useGroups = () => {
       ),
     );
 
-  // binds every pane action to one group
+  // Group actions
   const actionsFor = (groupId: string): GroupActions => ({
     close: () => removeGroup(groupId),
+    minimise: () => toggleGroup(groupId),
     selectPane: (paneId) => selectPane(groupId, paneId),
     addPane: () => addPane(groupId),
     removePane: (paneId) => removePane(groupId, paneId),
@@ -107,8 +133,12 @@ export const useGroups = () => {
   return {
     groups,
     canClose: groups.length > 1,
+    canToggle,
     addGroup,
+    toggleGroup,
     reload,
     actionsFor,
   };
 };
+
+export type UseGroupsReturn = ReturnType<typeof useGroups>;

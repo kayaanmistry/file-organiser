@@ -7,11 +7,38 @@
   gap: var(--row-gap);
 }
 
-.top {
+.topBar {
   display: flex;
   justify-content: space-between;
 
   min-width: 0;
+
+  gap: var(--row-gap);
+}
+
+.tabsArea {
+  display: flex;
+
+  min-width: 0;
+
+  gap: var(--row-gap);
+}
+
+.number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  aspect-ratio: 1;
+  box-sizing: content-box;
+  padding: var(--box-padding);
+
+  border: var(--line);
+}
+
+.controls {
+  display: flex;
 
   gap: var(--row-gap);
 }

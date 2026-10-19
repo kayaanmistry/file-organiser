@@ -1,41 +1,41 @@
 import { moveFiles } from "@/api/files";
 
+import { TextButton } from "@/components/Buttons/TextButton/TextButton";
+import { GroupTabs } from "@/components/Pane/PaneGroup/GroupTabs/GroupTabs";
 import { PaneGroup } from "@/components/Pane/PaneGroup/PaneGroup";
 import { SelectedFiles } from "@/components/SelectedFiles/SelectedFiles";
 import { Toolbar } from "@/components/Toolbar/Toolbar";
-import { TextButton } from "@/components/Buttons/TextButton/TextButton";
 
-import type { PaneState } from "@/hooks/useGroups";
+import type { UseGroupsReturn, PaneState } from "@/hooks/useGroups";
+import type { UseHistoryReturn } from "@/hooks/useHistory";
 import { useGroups } from "@/hooks/useGroups";
 import { useHistory } from "@/hooks/useHistory";
 import { useSelection } from "@/hooks/useSelection";
 
 import styles from "./Workspace.module.css";
 
-type ActionBarProps = {
-  canUndo: boolean;
-  canRedo: boolean;
-  onUndo: () => void;
-  onRedo: () => void;
-  onNewWindow: () => void;
+type TopBarProps = {
+  workspace: UseGroupsReturn;
+  history: UseHistoryReturn;
 };
 
-const ActionBar = ({
-  canUndo,
-  canRedo,
-  onUndo,
-  onRedo,
-  onNewWindow,
-}: ActionBarProps) => (
-  <Toolbar>
-    <TextButton onClick={onNewWindow}>new window</TextButton>
-    <TextButton onClick={onUndo} disabled={!canUndo}>
-      undo
-    </TextButton>
-    <TextButton onClick={onRedo} disabled={!canRedo}>
-      redo
-    </TextButton>
-  </Toolbar>
+const TopBar = ({ workspace, history }: TopBarProps) => (
+  <div className={styles.topBar}>
+    <GroupTabs
+      groups={workspace.groups}
+      canToggle={workspace.canToggle}
+      onToggle={workspace.toggleGroup}
+    />
+    <Toolbar>
+      <TextButton onClick={workspace.addGroup}>new window</TextButton>
+      <TextButton onClick={history.undo} disabled={!history.canUndo}>
+        undo
+      </TextButton>
+      <TextButton onClick={history.redo} disabled={!history.canRedo}>
+        redo
+      </TextButton>
+    </Toolbar>
+  </div>
 );
 
 export const Workspace = () => {
@@ -62,24 +62,23 @@ export const Workspace = () => {
 
   return (
     <div className={styles.workspace}>
-      <ActionBar
-        canUndo={history.canUndo}
-        canRedo={history.canRedo}
-        onUndo={history.undo}
-        onRedo={history.redo}
-        onNewWindow={workspace.addGroup}
-      />
+      <TopBar workspace={workspace} history={history} />
       <div className={styles.paneGroups}>
-        {workspace.groups.map((group) => (
-          <PaneGroup
-            key={group.id}
-            group={group}
-            actions={workspace.actionsFor(group.id)}
-            canClose={workspace.canClose}
-            selection={selection}
-            onMoveHere={moveHere}
-          />
-        ))}
+        {workspace.groups.map(
+          (group, i) =>
+            group.visible && (
+              <PaneGroup
+                key={group.id}
+                number={i + 1}
+                group={group}
+                actions={workspace.actionsFor(group.id)}
+                canClose={workspace.canClose}
+                canMinimise={workspace.canToggle(group)}
+                selection={selection}
+                onMoveHere={moveHere}
+              />
+            ),
+        )}
       </div>
       <SelectedFiles
         selected={selection.entries}

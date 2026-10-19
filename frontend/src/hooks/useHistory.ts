@@ -30,3 +30,5 @@ export const useHistory = (onChange: () => Promise<void>) => {
 
   return { ...state, refresh, undo: undoLast, redo: redoLast };
 };
+
+export type UseHistoryReturn = ReturnType<typeof useHistory>;

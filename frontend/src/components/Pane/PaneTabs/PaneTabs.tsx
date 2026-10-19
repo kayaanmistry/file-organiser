@@ -3,6 +3,7 @@ import { IconButton } from "@/components/Buttons/IconButton/IconButton";
 import type { PaneState } from "@/hooks/useGroups";
 
 import { formatFolderName } from "@/utils/format";
+import { scrollSideways } from "@/utils/input";
 
 import styles from "./PaneTabs.module.css";
 
@@ -58,7 +59,7 @@ export const PaneTabs = ({
   onAdd,
   onRemove,
 }: PaneTabsProps) => (
-  <nav className={styles.tabs}>
+  <nav className={styles.tabs} onWheel={scrollSideways}>
     {panes.map((pane) => (
       <Tab
         key={pane.id}

@@ -1,0 +1,5 @@
+.groupTabs {
+  display: flex;
+
+  gap: var(--row-gap);
+}
