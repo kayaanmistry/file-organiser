@@ -15,19 +15,19 @@ import { useSelection } from "@/hooks/useSelection";
 import styles from "./Workspace.module.css";
 
 type TopBarProps = {
-  workspace: UseGroupsReturn;
+  groups: UseGroupsReturn;
   history: UseHistoryReturn;
 };
 
-const TopBar = ({ workspace, history }: TopBarProps) => (
+const TopBar = ({ groups, history }: TopBarProps) => (
   <div className={styles.topBar}>
     <GroupTabs
-      groups={workspace.groups}
-      canToggle={workspace.canToggle}
-      onToggle={workspace.toggleGroup}
+      groups={groups.list}
+      canToggle={groups.canToggle}
+      onToggle={groups.toggleGroup}
     />
     <Toolbar>
-      <TextButton onClick={workspace.addGroup}>new window</TextButton>
+      <TextButton onClick={groups.addGroup}>new window</TextButton>
       <TextButton onClick={history.undo} disabled={!history.canUndo}>
         undo
       </TextButton>
@@ -39,12 +39,12 @@ const TopBar = ({ workspace, history }: TopBarProps) => (
 );
 
 export const Workspace = () => {
-  const workspace = useGroups();
+  const groups = useGroups();
   const selection = useSelection();
 
   const history = useHistory(async () => {
     selection.clear();
-    await workspace.reload();
+    await groups.reload();
   });
 
   const moveHere = async (target: PaneState) => {
@@ -56,24 +56,24 @@ export const Workspace = () => {
     );
 
     selection.clear();
-    await workspace.reload();
+    await groups.reload();
     await history.refresh();
   };
 
   return (
     <div className={styles.workspace}>
-      <TopBar workspace={workspace} history={history} />
+      <TopBar groups={groups} history={history} />
       <div className={styles.paneGroups}>
-        {workspace.groups.map(
+        {groups.list.map(
           (group, i) =>
             group.visible && (
               <PaneGroup
                 key={group.id}
                 number={i + 1}
                 group={group}
-                actions={workspace.actionsFor(group.id)}
-                canClose={workspace.canClose}
-                canMinimise={workspace.canToggle(group)}
+                actions={groups.actionsFor(group.id)}
+                canClose={groups.canClose}
+                canMinimise={groups.canToggle(group)}
                 selection={selection}
                 onMoveHere={moveHere}
               />

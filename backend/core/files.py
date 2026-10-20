@@ -35,11 +35,28 @@ def list_entries(path: str) -> list[Entry]:
         })
     return entries
 
+INVALID_CHARS = '/\\:*?"<>|'
+RESERVED_NAMES = [".", ".."]
+
+def check_name(name: str) -> None:
+    if name == "":
+        raise ValueError("Name can't be empty")
+    if name in RESERVED_NAMES:
+        raise ValueError(f"Name can't be {name}")
+    if any(char in INVALID_CHARS for char in name):
+        raise ValueError(f"Name can't contain any of {INVALID_CHARS}")
+
+def check_can_move(source: Path, target: Path) -> None:
+    if not source.exists():
+        raise FileNotFoundError(f"Not found: {source}")
+    if target.exists() and not target.samefile(source):
+        raise FileExistsError(f"Already exists: {target}")
+
 class MoveAction(Action):
     def __init__(self, paths: list[str], destination: str):
         self.paths = paths
         self.destination = destination
-        self.moves: list[tuple[Path, Path]] = []  # (original, new)
+        self.moves: list[tuple[Path, Path]] = [] 
 
     @property
     def label(self) -> str:
@@ -60,12 +77,9 @@ class MoveAction(Action):
 
         # check if source exists and target doesnt already exists in destination
         for source, target in moves:
-            if not source.exists():
-                raise FileNotFoundError(f"Source not found: {source}")
+            check_can_move(source, target)
             if source.is_dir() and destination_path.is_relative_to(source.resolve()):
                 raise ValueError(f"Cannot move a folder into itself: {source}")
-            if target.exists():
-                raise FileExistsError(f"Already exists: {target}")
 
         for source, target in moves:
             shutil.move(source, target)
@@ -73,14 +87,44 @@ class MoveAction(Action):
         self.moves = moves
 
     def undo(self) -> None:
-        
         # check if source and target exists 
         for source, target in self.moves:
-            if not target.exists():
-                raise FileNotFoundError(f"Not found: {target}")
-            if source.exists():
-                raise FileExistsError(f"Already exists: {source}")
+            for source, target in self.moves:
+                check_can_move(target, source)
 
         for source, target in self.moves:
             shutil.move(target, source)
+
+class NewFolderAction(Action):
+    def __init__(self, parent: str, name: str):
+        check_name(name)
+        self.path = Path(parent) / name
+
+    @property
+    def label(self) -> str:
+        return f"new folder {self.path.name}"
+
+    def execute(self) -> None:
+        self.path.mkdir()  
+
+    def undo(self) -> None:
+        self.path.rmdir() 
+
+class RenameAction(Action):
+    def __init__(self, path: str, name: str):
+        check_name(name)
+        self.source = Path(path)
+        self.target = self.source.with_name(name)
+
+    @property
+    def label(self) -> str:
+        return f"rename {self.source.name} to {self.target.name}"
+
+    def execute(self) -> None:
+        check_can_move(self.source, self.target)
+        self.source.rename(self.target)
+
+    def undo(self) -> None:
+        check_can_move(self.target, self.source)
+        self.target.rename(self.source)
 

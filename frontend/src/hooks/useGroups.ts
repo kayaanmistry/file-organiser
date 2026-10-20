@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { listFiles, selectFolder, type Entry } from "@/api/files";
 
-export const MAX_VISIBLE = 4;
+export const MAX_VISIBLE = 2;
 
 // types
 export type PaneState = {
@@ -131,7 +131,7 @@ export const useGroups = () => {
   });
 
   return {
-    groups,
+    list: groups,
     canClose: groups.length > 1,
     canToggle,
     addGroup,

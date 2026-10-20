@@ -1,5 +1,5 @@
 import type { Entry } from "@/api/files";
-import type { PaneState } from "@/components/Pane/Pane";
+import type { PaneState } from "@/hooks/useGroups";
 
 import { isInside } from "./path";
 
