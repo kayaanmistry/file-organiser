@@ -1,6 +1,6 @@
 import webview
 
-from core.files import Entry, MoveAction, NewFolderAction, RenameAction, list_entries
+from core.files import Entry, MoveAction, DeleteAction, NewFolderAction, RenameAction, list_entries
 from core.history import history
 
 class FilesApi:
@@ -25,5 +25,9 @@ class FilesApi:
 
     def rename_file(self, path: str, name: str) -> None:
         history.run(RenameAction(path, name))
+
+    def delete_files(self, paths: list[str]) -> None:
+        history.run(DeleteAction(paths))
+    
 
 

@@ -19,6 +19,9 @@ export const listFiles = (path: string) =>
 export const moveFiles = (paths: string[], destination: string) =>
   call<void>({ name: "move_files", args: [paths, destination] });
 
+export const deleteFiles = (paths: string[]) =>
+  call<void>({ name: "delete_files", args: [paths] });
+
 export const createFolder = (parent: string, name: string) =>
   call<void>({ name: "create_folder", args: [parent, name] });
 

@@ -29,10 +29,12 @@ type ActionBarProps = {
   canSelect: boolean;
   canDeselect: boolean;
   canMove: boolean;
+  canDelete: boolean;
   onNewFolder: () => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
   onMove: () => void;
+  onDelete: () => void;
 };
 
 const ActionBar = ({
@@ -40,10 +42,12 @@ const ActionBar = ({
   canSelect,
   canDeselect,
   canMove,
+  canDelete,
   onNewFolder,
   onSelectAll,
   onDeselectAll,
   onMove,
+  onDelete,
 }: ActionBarProps) => (
   <Toolbar>
     <TextButton onClick={onNewFolder} disabled={!canCreate}>
@@ -58,6 +62,9 @@ const ActionBar = ({
     <TextButton onClick={onMove} disabled={!canMove}>
       move here
     </TextButton>
+    <TextButton onClick={onDelete} disabled={!canDelete}>
+      delete
+    </TextButton>
   </Toolbar>
 );
 
@@ -71,6 +78,7 @@ type PaneProps = {
   onMoveHere: () => void;
   onNewFolder: (name: string) => void;
   onRename: (entry: Entry, name: string) => void;
+  onDelete: (entries: Entry[]) => void;
 };
 
 export const Pane = ({
@@ -83,6 +91,7 @@ export const Pane = ({
   onMoveHere,
   onNewFolder,
   onRename,
+  onDelete,
 }: PaneProps) => {
   const naming = useNaming(pane, onNewFolder, onRename);
 
@@ -92,7 +101,8 @@ export const Pane = ({
     onOpenFolder(selectedPath);
   };
 
-  const selectedHere = selected.filter((e) => e.parent === pane.path).length;
+  const selectedHere = selected.filter((e) => e.parent === pane.path);
+  const selectedCount = selectedHere.length;
 
   return (
     <section className={styles.pane}>
@@ -106,13 +116,15 @@ export const Pane = ({
       />
       <ActionBar
         canCreate={!!pane.path && !naming.isEditing}
-        canSelect={selectedHere < pane.entries.length}
-        canDeselect={selectedHere > 0}
+        canSelect={selectedCount < pane.entries.length}
+        canDeselect={selectedCount > 0}
         canMove={canMoveTo(selected, pane)}
+        canDelete={selectedCount > 0}
         onNewFolder={naming.startNewFolder}
         onSelectAll={() => onSelectAll(pane.entries)}
         onDeselectAll={() => onDeselectAll(pane.entries)}
         onMove={onMoveHere}
+        onDelete={() => onDelete(selectedHere)}
       />
     </section>
   );

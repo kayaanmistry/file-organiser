@@ -66,6 +66,7 @@ export const Workspace = () => {
                 onMoveHere={operations.moveHere}
                 onNewFolder={operations.newFolder}
                 onRename={operations.rename}
+                onDelete={operations.remove}
               />
             ),
         )}
@@ -74,6 +75,7 @@ export const Workspace = () => {
         selected={selection.entries}
         onRemove={selection.toggle}
         onClear={selection.clear}
+        onDelete={() => operations.remove(selection.entries)}
       />
     </div>
   );

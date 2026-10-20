@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import TypedDict
 
 from core.history import Action
+from core.trash import restore, trash
 
 IGNORED = {".DS_Store", "Thumbs.db", "desktop.ini"}
 
@@ -87,10 +88,8 @@ class MoveAction(Action):
         self.moves = moves
 
     def undo(self) -> None:
-        # check if source and target exists 
         for source, target in self.moves:
-            for source, target in self.moves:
-                check_can_move(target, source)
+            check_can_move(target, source)
 
         for source, target in self.moves:
             shutil.move(target, source)
@@ -127,4 +126,27 @@ class RenameAction(Action):
     def undo(self) -> None:
         check_can_move(self.target, self.source)
         self.target.rename(self.source)
+
+class DeleteAction(Action):
+    def __init__(self, paths: list[str]):
+        self.paths = [Path(p) for p in paths]
+        self.binned: list[tuple[Path, Path]] = []
+
+    @property
+    def label(self) -> str:
+        return f"delete {len(self.paths)} item(s)"
+
+    def execute(self) -> None:
+        for path in self.paths:
+            if not path.exists():
+                raise FileNotFoundError(f"Not found: {path}")
+
+        self.binned = [(path, trash(path)) for path in self.paths]
+
+    def undo(self) -> None:
+        for original, binned in self.binned:
+            check_can_move(binned, original)
+
+        for original, binned in self.binned:
+            restore(binned, original)
 

@@ -54,6 +54,7 @@ type PaneGroupProps = {
   onMoveHere: (target: PaneState) => void;
   onNewFolder: (target: PaneState, name: string) => void;
   onRename: (entry: Entry, name: string) => void;
+  onDelete: (entries: Entry[]) => void;
 };
 
 export const PaneGroup = ({
@@ -66,6 +67,7 @@ export const PaneGroup = ({
   onMoveHere,
   onNewFolder,
   onRename,
+  onDelete,
 }: PaneGroupProps) => {
   const active = group.panes.find((pane) => pane.id === group.activeId)!;
 
@@ -89,6 +91,7 @@ export const PaneGroup = ({
         onMoveHere={() => onMoveHere(active)}
         onNewFolder={(name) => onNewFolder(active, name)}
         onRename={onRename}
+        onDelete={onDelete}
       />
     </div>
   );
