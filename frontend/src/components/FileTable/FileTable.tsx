@@ -1,6 +1,11 @@
 import type { Entry } from "@/api/files";
 
-import { COLUMNS, type ColumnId } from "./columns";
+import type { Naming } from "@/components/Name/Name";
+import { Name } from "@/components/Name/Name";
+
+import type { ColumnId } from "./columns";
+import { COLUMNS } from "./columns";
+
 import styles from "./FileTable.module.css";
 
 type ColumnHeadersProps = {
@@ -17,11 +22,26 @@ const ColumnHeaders = ({ columns }: ColumnHeadersProps) => (
   </div>
 );
 
+type CellProps = {
+  id: ColumnId;
+  entry: Entry;
+  naming?: Naming;
+};
+
+const Cell = ({ id, entry, naming }: CellProps) => {
+  if (id === "name") {
+    return <Name entry={entry} naming={naming} />;
+  }
+
+  return COLUMNS[id].render(entry);
+};
+
 type EntryRowProps = {
   entry: Entry;
   columns: ColumnId[];
   isSelected: boolean;
   isClickable: boolean;
+  naming?: Naming;
   onClick: () => void;
 };
 
@@ -30,26 +50,32 @@ const EntryRow = ({
   columns,
   isSelected,
   isClickable,
+  naming,
   onClick,
-}: EntryRowProps) => (
-  <div
-    className={styles.row}
-    data-clickable={isClickable || undefined}
-    data-selected={isSelected}
-    onClick={onClick}
-  >
-    {columns.map((id) => (
-      <span key={id} className={styles.cell}>
-        {COLUMNS[id].render(entry)}
-      </span>
-    ))}
-  </div>
-);
+}: EntryRowProps) => {
+  const isEditing = naming?.editingPath === entry.path;
+
+  return (
+    <div
+      className={styles.row}
+      data-clickable={(isClickable && !isEditing) || undefined}
+      data-selected={isSelected}
+      onClick={isEditing ? undefined : onClick}
+    >
+      {columns.map((id) => (
+        <span key={id} className={styles.cell}>
+          <Cell id={id} entry={entry} naming={naming} />
+        </span>
+      ))}
+    </div>
+  );
+};
 
 type FileTableProps = {
   entries: Entry[];
   columns: ColumnId[];
   selected: Entry[];
+  naming?: Naming;
   onRowClick?: (entry: Entry) => void;
 };
 
@@ -57,6 +83,7 @@ export const FileTable = ({
   entries,
   columns,
   selected,
+  naming,
   onRowClick,
 }: FileTableProps) => (
   <div className={styles.table}>
@@ -69,6 +96,7 @@ export const FileTable = ({
           columns={columns}
           isSelected={selected.some((e) => e.path === entry.path)}
           isClickable={!!onRowClick}
+          naming={naming}
           onClick={() => onRowClick?.(entry)}
         />
       ))}

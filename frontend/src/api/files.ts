@@ -21,3 +21,6 @@ export const moveFiles = (paths: string[], destination: string) =>
 
 export const createFolder = (parent: string, name: string) =>
   call<void>({ name: "create_folder", args: [parent, name] });
+
+export const renameFile = (path: string, name: string) =>
+  call<void>({ name: "rename_file", args: [path, name] });

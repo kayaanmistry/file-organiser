@@ -1,13 +1,12 @@
-import { moveFiles } from "@/api/files";
-
 import { TextButton } from "@/components/Buttons/TextButton/TextButton";
 import { GroupTabs } from "@/components/Pane/PaneGroup/GroupTabs/GroupTabs";
 import { PaneGroup } from "@/components/Pane/PaneGroup/PaneGroup";
 import { SelectedFiles } from "@/components/SelectedFiles/SelectedFiles";
 import { Toolbar } from "@/components/Toolbar/Toolbar";
 
-import type { UseGroupsReturn, PaneState } from "@/hooks/useGroups";
+import type { UseGroupsReturn } from "@/hooks/useGroups";
 import type { UseHistoryReturn } from "@/hooks/useHistory";
+import { useFileOperations } from "@/hooks/useFileOperations";
 import { useGroups } from "@/hooks/useGroups";
 import { useHistory } from "@/hooks/useHistory";
 import { useSelection } from "@/hooks/useSelection";
@@ -47,18 +46,7 @@ export const Workspace = () => {
     await groups.reload();
   });
 
-  const moveHere = async (target: PaneState) => {
-    if (!target.path) return;
-
-    await moveFiles(
-      selection.entries.map((e) => e.path),
-      target.path,
-    );
-
-    selection.clear();
-    await groups.reload();
-    await history.refresh();
-  };
+  const operations = useFileOperations(groups, selection, history);
 
   return (
     <div className={styles.workspace}>
@@ -75,7 +63,9 @@ export const Workspace = () => {
                 canClose={groups.canClose}
                 canMinimise={groups.canToggle(group)}
                 selection={selection}
-                onMoveHere={moveHere}
+                onMoveHere={operations.moveHere}
+                onNewFolder={operations.newFolder}
+                onRename={operations.rename}
               />
             ),
         )}

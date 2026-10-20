@@ -21,3 +21,25 @@ export const isValidName = (name: string) => {
 
   return true;
 };
+
+// true if name matches any taken name
+export const isNameTaken = (name: string, taken: string[]) => {
+  for (const t of taken) {
+    if (t.toLowerCase() === name.toLowerCase()) return true;
+  }
+
+  return false;
+};
+
+// creates unique default names
+export const uniqueName = (base: string, taken: string[]) => {
+  let name = base;
+  let count = 2;
+
+  while (isNameTaken(name, taken)) {
+    name = `${base} ${count}`;
+    count++;
+  }
+
+  return name;
+};

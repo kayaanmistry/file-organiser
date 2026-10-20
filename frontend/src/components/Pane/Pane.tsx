@@ -1,11 +1,12 @@
 import { selectFolder, type Entry } from "@/api/files";
 
-import { TextButton } from "@/components/Buttons/TextButton/TextButton";
-import { FileTable } from "@/components/FileTable/FileTable";
 import { DEFAULT_COLUMNS } from "@/components/FileTable/columns";
 import { Toolbar } from "@/components/Toolbar/Toolbar";
+import { FileTable } from "@/components/FileTable/FileTable";
+import { TextButton } from "@/components/Buttons/TextButton/TextButton";
 
 import type { PaneState } from "@/hooks/useGroups";
+import { useNaming } from "@/hooks/useNaming";
 
 import { canMoveTo } from "@/utils/move";
 
@@ -24,23 +25,30 @@ const PathBar = ({ path, onSelect }: PathBarProps) => (
 );
 
 type ActionBarProps = {
+  canCreate: boolean;
   canSelect: boolean;
   canDeselect: boolean;
   canMove: boolean;
+  onNewFolder: () => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
   onMove: () => void;
 };
 
 const ActionBar = ({
+  canCreate,
   canSelect,
   canDeselect,
   canMove,
+  onNewFolder,
   onSelectAll,
   onDeselectAll,
   onMove,
 }: ActionBarProps) => (
   <Toolbar>
+    <TextButton onClick={onNewFolder} disabled={!canCreate}>
+      new folder
+    </TextButton>
     <TextButton onClick={onSelectAll} disabled={!canSelect}>
       select all
     </TextButton>
@@ -61,6 +69,8 @@ type PaneProps = {
   onSelectAll: (entries: Entry[]) => void;
   onDeselectAll: (entries: Entry[]) => void;
   onMoveHere: () => void;
+  onNewFolder: (name: string) => void;
+  onRename: (entry: Entry, name: string) => void;
 };
 
 export const Pane = ({
@@ -71,7 +81,11 @@ export const Pane = ({
   onSelectAll,
   onDeselectAll,
   onMoveHere,
+  onNewFolder,
+  onRename,
 }: PaneProps) => {
+  const naming = useNaming(pane, onNewFolder, onRename);
+
   const handleSelect = async () => {
     const selectedPath = await selectFolder();
     if (!selectedPath) return;
@@ -84,15 +98,18 @@ export const Pane = ({
     <section className={styles.pane}>
       <PathBar path={pane.path} onSelect={handleSelect} />
       <FileTable
-        entries={pane.entries}
+        entries={naming.entries}
         columns={DEFAULT_COLUMNS}
         selected={selected}
+        naming={naming}
         onRowClick={onToggle}
       />
       <ActionBar
+        canCreate={!!pane.path && !naming.isEditing}
         canSelect={selectedHere < pane.entries.length}
         canDeselect={selectedHere > 0}
         canMove={canMoveTo(selected, pane)}
+        onNewFolder={naming.startNewFolder}
         onSelectAll={() => onSelectAll(pane.entries)}
         onDeselectAll={() => onDeselectAll(pane.entries)}
         onMove={onMoveHere}

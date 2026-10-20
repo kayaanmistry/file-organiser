@@ -1,3 +1,5 @@
+import type { Entry } from "@/api/files";
+
 import { Pane } from "@/components/Pane/Pane";
 import { PaneTabs } from "@/components/Pane/PaneTabs/PaneTabs";
 import { IconButton } from "@/components/Buttons/IconButton/IconButton";
@@ -50,6 +52,8 @@ type PaneGroupProps = {
   canMinimise: boolean;
   selection: UseSelectionReturn;
   onMoveHere: (target: PaneState) => void;
+  onNewFolder: (target: PaneState, name: string) => void;
+  onRename: (entry: Entry, name: string) => void;
 };
 
 export const PaneGroup = ({
@@ -60,6 +64,8 @@ export const PaneGroup = ({
   canMinimise,
   selection,
   onMoveHere,
+  onNewFolder,
+  onRename,
 }: PaneGroupProps) => {
   const active = group.panes.find((pane) => pane.id === group.activeId)!;
 
@@ -81,6 +87,8 @@ export const PaneGroup = ({
         onSelectAll={selection.add}
         onDeselectAll={selection.remove}
         onMoveHere={() => onMoveHere(active)}
+        onNewFolder={(name) => onNewFolder(active, name)}
+        onRename={onRename}
       />
     </div>
   );
