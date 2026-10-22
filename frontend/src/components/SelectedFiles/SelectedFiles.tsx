@@ -46,7 +46,8 @@ export const SelectedFiles = ({
     <FileTable
       entries={selected}
       columns={SELECTED_COLUMNS}
-      selected={[]}
+      isSelected={() => false}
+      getDragged={() => selected}
       onRowClick={onRemove}
     />
     <ActionBar

@@ -82,3 +82,9 @@ button {
 [data-selected="true"] {
   background: var(--selected-colour);
 }
+
+[data-drop="true"] {
+  background: var(--hover-colour);
+  outline: var(--line);
+  outline-offset: -0.5px;
+}

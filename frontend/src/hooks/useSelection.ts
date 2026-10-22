@@ -5,6 +5,9 @@ import type { Entry } from "@/api/files";
 export const useSelection = () => {
   const [selected, setSelected] = useState<Entry[]>([]);
 
+  const paths = new Set(selected.map((e) => e.path));
+  const isSelected = (entry: Entry) => paths.has(entry.path);
+
   const toggle = (entry: Entry) => {
     setSelected((current) => {
       const isSelected = current.some((e) => e.path === entry.path);
@@ -29,7 +32,7 @@ export const useSelection = () => {
 
   const clear = () => setSelected([]);
 
-  return { entries: selected, toggle, add, remove, clear };
+  return { entries: selected, isSelected, toggle, add, remove, clear };
 };
 
 export type UseSelectionReturn = ReturnType<typeof useSelection>;

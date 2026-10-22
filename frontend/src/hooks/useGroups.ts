@@ -5,6 +5,7 @@ import { listFiles, selectFolder, type Entry } from "@/api/files";
 export const MAX_VISIBLE = 2;
 
 // types
+
 export type PaneState = {
   id: string;
   path: string | null;
@@ -18,6 +19,11 @@ export type GroupState = {
   visible?: boolean;
 };
 
+export type TabRef = {
+  groupId: string;
+  paneId: string;
+};
+
 export type GroupActions = {
   close: () => void;
   minimise: () => void;
@@ -25,9 +31,11 @@ export type GroupActions = {
   addPane: () => void;
   removePane: (paneId: string) => void;
   openFolder: (paneId: string, path: string) => void;
+  moveTabHere: (tab: TabRef, beforeId: string | null) => void;
 };
 
 // create
+
 const createPane = (
   path: string | null = null,
   entries: Entry[] = [],
@@ -41,6 +49,35 @@ const createGroup = (visible = true): GroupState => {
     activeId: pane.id,
     visible,
   };
+};
+
+// helpers, take a group and return an updated copy
+
+const removePaneFrom = (group: GroupState, paneId: string): GroupState => {
+  const index = group.panes.findIndex((p) => p.id === paneId);
+  const panes = group.panes.filter((p) => p.id !== paneId);
+  if (panes.length === 0) panes.push(createPane());
+
+  const activeId =
+    group.activeId === paneId
+      ? panes[Math.max(0, index - 1)].id
+      : group.activeId;
+
+  return { ...group, panes, activeId };
+};
+
+const insertPaneInto = (
+  group: GroupState,
+  pane: PaneState,
+  beforeId: string | null,
+): GroupState => {
+  const panes = [...group.panes];
+  const index = beforeId
+    ? panes.findIndex((p) => p.id === beforeId)
+    : panes.length;
+  panes.splice(index, 0, pane);
+
+  return { ...group, panes, activeId: pane.id };
 };
 
 export const useGroups = () => {
@@ -89,24 +126,22 @@ export const useGroups = () => {
     if (!path) return;
 
     const pane = createPane(path, await listFiles(path));
-    updateGroup(groupId, (g) => ({
-      ...g,
-      panes: [...g.panes, pane],
-      activeId: pane.id,
-    }));
+    updateGroup(groupId, (g) => insertPaneInto(g, pane, null));
   };
 
   const removePane = (groupId: string, paneId: string) =>
-    updateGroup(groupId, (g) => {
-      if (g.panes.length === 1) return g;
+    updateGroup(groupId, (g) =>
+      g.panes.length === 1 ? g : removePaneFrom(g, paneId),
+    );
 
-      const index = g.panes.findIndex((p) => p.id === paneId);
-      const panes = g.panes.filter((p) => p.id !== paneId);
-      const activeId =
-        g.activeId === paneId ? panes[Math.max(0, index - 1)].id : g.activeId;
+  const moveTab = (tab: TabRef, toGroupId: string, beforeId: string | null) => {
+    const pane = groups
+      .find((g) => g.id === tab.groupId)!
+      .panes.find((p) => p.id === tab.paneId)!;
 
-      return { ...g, panes, activeId };
-    });
+    updateGroup(tab.groupId, (g) => removePaneFrom(g, tab.paneId));
+    updateGroup(toGroupId, (g) => insertPaneInto(g, pane, beforeId));
+  };
 
   const selectPane = (groupId: string, paneId: string) =>
     updateGroup(groupId, (g) => ({ ...g, activeId: paneId }));
@@ -128,6 +163,7 @@ export const useGroups = () => {
     addPane: () => addPane(groupId),
     removePane: (paneId) => removePane(groupId, paneId),
     openFolder: (paneId, path) => openFolder(groupId, paneId, path),
+    moveTabHere: (tab, beforeId) => moveTab(tab, groupId, beforeId),
   });
 
   return {

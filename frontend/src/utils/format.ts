@@ -1,5 +1,3 @@
-const SIZE_UNITS = ["B", "KB", "MB", "GB", "TB"];
-
 export const formatType = (ext: string) => ext.slice(1);
 
 export const formatName = (name: string, ext: string) => {
@@ -18,6 +16,8 @@ export const formatDate = (seconds: number) => {
 
   return `${day}-${month}-${year}`;
 };
+
+const SIZE_UNITS = ["B", "KB", "MB", "GB", "TB"];
 
 export const formatSize = (bytes: number) => {
   let size = bytes;

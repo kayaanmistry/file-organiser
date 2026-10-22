@@ -3,6 +3,8 @@ import type { Entry } from "@/api/files";
 import type { Naming } from "@/components/Name/Name";
 import { Name } from "@/components/Name/Name";
 
+import { useDrag } from "@/hooks/drag/useDrag";
+
 import type { ColumnId } from "./columns";
 import { COLUMNS } from "./columns";
 
@@ -41,6 +43,7 @@ type EntryRowProps = {
   columns: ColumnId[];
   isSelected: boolean;
   isClickable: boolean;
+  dragged: Entry[];
   naming?: Naming;
   onClick: () => void;
 };
@@ -50,10 +53,13 @@ const EntryRow = ({
   columns,
   isSelected,
   isClickable,
+  dragged,
   naming,
   onClick,
 }: EntryRowProps) => {
   const isEditing = naming?.editingPath === entry.path;
+
+  const drag = useDrag({ kind: "entries", data: dragged }, !isEditing);
 
   return (
     <div
@@ -61,6 +67,7 @@ const EntryRow = ({
       data-clickable={(isClickable && !isEditing) || undefined}
       data-selected={isSelected}
       onClick={isEditing ? undefined : onClick}
+      {...drag}
     >
       {columns.map((id) => (
         <span key={id} className={styles.cell}>
@@ -74,7 +81,8 @@ const EntryRow = ({
 type FileTableProps = {
   entries: Entry[];
   columns: ColumnId[];
-  selected: Entry[];
+  isSelected: (entry: Entry) => boolean;
+  getDragged: (entry: Entry) => Entry[];
   naming?: Naming;
   onRowClick?: (entry: Entry) => void;
 };
@@ -82,7 +90,8 @@ type FileTableProps = {
 export const FileTable = ({
   entries,
   columns,
-  selected,
+  isSelected,
+  getDragged,
   naming,
   onRowClick,
 }: FileTableProps) => (
@@ -94,8 +103,9 @@ export const FileTable = ({
           key={entry.path}
           entry={entry}
           columns={columns}
-          isSelected={selected.some((e) => e.path === entry.path)}
+          isSelected={isSelected(entry)}
           isClickable={!!onRowClick}
+          dragged={getDragged(entry)}
           naming={naming}
           onClick={() => onRowClick?.(entry)}
         />

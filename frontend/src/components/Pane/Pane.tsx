@@ -7,6 +7,7 @@ import { TextButton } from "@/components/Buttons/TextButton/TextButton";
 
 import type { PaneState } from "@/hooks/useGroups";
 import { useNaming } from "@/hooks/useNaming";
+import { useDrop } from "@/hooks/drag/useDrop";
 
 import { canMoveTo } from "@/utils/move";
 
@@ -71,11 +72,12 @@ const ActionBar = ({
 type PaneProps = {
   pane: PaneState;
   selected: Entry[];
+  isSelected: (entry: Entry) => boolean;
   onOpenFolder: (path: string) => void;
   onToggle: (entry: Entry) => void;
   onSelectAll: (entries: Entry[]) => void;
   onDeselectAll: (entries: Entry[]) => void;
-  onMoveHere: () => void;
+  onMove: (entries: Entry[], destination: string) => void;
   onNewFolder: (name: string) => void;
   onRename: (entry: Entry, name: string) => void;
   onDelete: (entries: Entry[]) => void;
@@ -84,16 +86,22 @@ type PaneProps = {
 export const Pane = ({
   pane,
   selected,
+  isSelected,
   onOpenFolder,
   onToggle,
   onSelectAll,
   onDeselectAll,
-  onMoveHere,
+  onMove,
   onNewFolder,
   onRename,
   onDelete,
 }: PaneProps) => {
   const naming = useNaming(pane, onNewFolder, onRename);
+
+  const drop = useDrop({
+    entries: (entries) =>
+      canMoveTo(entries, pane) && (() => onMove(entries, pane.path!)),
+  });
 
   const handleSelect = async () => {
     const selectedPath = await selectFolder();
@@ -101,16 +109,17 @@ export const Pane = ({
     onOpenFolder(selectedPath);
   };
 
-  const selectedHere = selected.filter((e) => e.parent === pane.path);
+  const selectedHere = pane.entries.filter(isSelected);
   const selectedCount = selectedHere.length;
 
   return (
-    <section className={styles.pane}>
+    <section className={styles.pane} data-drop={drop.isOver} {...drop.props}>
       <PathBar path={pane.path} onSelect={handleSelect} />
       <FileTable
         entries={naming.entries}
         columns={DEFAULT_COLUMNS}
-        selected={selected}
+        isSelected={isSelected}
+        getDragged={(entry) => (isSelected(entry) ? selectedHere : [entry])}
         naming={naming}
         onRowClick={onToggle}
       />
@@ -123,7 +132,7 @@ export const Pane = ({
         onNewFolder={naming.startNewFolder}
         onSelectAll={() => onSelectAll(pane.entries)}
         onDeselectAll={() => onDeselectAll(pane.entries)}
-        onMove={onMoveHere}
+        onMove={() => onMove(selected, pane.path!)}
         onDelete={() => onDelete(selectedHere)}
       />
     </section>

@@ -63,7 +63,7 @@ export const Workspace = () => {
                 canClose={groups.canClose}
                 canMinimise={groups.canToggle(group)}
                 selection={selection}
-                onMoveHere={operations.moveHere}
+                onMove={operations.move}
                 onNewFolder={operations.newFolder}
                 onRename={operations.rename}
                 onDelete={operations.remove}

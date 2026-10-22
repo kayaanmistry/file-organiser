@@ -10,38 +10,37 @@ export const useFileOperations = (
   selection: UseSelectionReturn,
   history: UseHistoryReturn,
 ) => {
-  const apply = async (operation: Promise<void>) => {
+  const apply = async (operation: Promise<void>, touched: Entry[]) => {
     try {
       await operation;
     } finally {
-      selection.clear();
+      selection.remove(touched);
       await groups.reload();
       await history.refresh();
     }
   };
 
-  const moveHere = (target: PaneState) => {
-    if (!target.path) return;
+  const move = (entries: Entry[], destination: string) =>
     apply(
       moveFiles(
-        selection.entries.map((e) => e.path),
-        target.path,
+        entries.map((e) => e.path),
+        destination,
       ),
+      entries,
     );
-  };
 
   const remove = (entries: Entry[]) =>
-    apply(deleteFiles(entries.map((e) => e.path)));
+    apply(deleteFiles(entries.map((e) => e.path)), entries);
 
   const newFolder = (target: PaneState, name: string) => {
     if (!target.path) return;
-    apply(createFolder(target.path, name));
+    apply(createFolder(target.path, name), []);
   };
 
   const rename = (entry: Entry, name: string) =>
-    apply(renameFile(entry.path, name));
+    apply(renameFile(entry.path, name), [entry]);
 
-  return { moveHere, remove, newFolder, rename };
+  return { move, remove, newFolder, rename };
 };
 
 export type UseFileOperationsReturn = ReturnType<typeof useFileOperations>;
