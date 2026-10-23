@@ -1,11 +1,12 @@
-import { TextButton } from "@/components/Buttons/TextButton/TextButton";
-import { GroupTabs } from "@/components/Pane/PaneGroup/GroupTabs/GroupTabs";
-import { PaneGroup } from "@/components/Pane/PaneGroup/PaneGroup";
+import { ActionBar } from "@/components/ActionBar/ActionBar";
+import { GroupTabs } from "@/components/PaneGroup/GroupTabs/GroupTabs";
+import { PaneGroup } from "@/components/PaneGroup/PaneGroup";
 import { SelectedFiles } from "@/components/SelectedFiles/SelectedFiles";
-import { Toolbar } from "@/components/Toolbar/Toolbar";
 
-import type { UseGroupsReturn } from "@/hooks/useGroups";
-import type { UseHistoryReturn } from "@/hooks/useHistory";
+import { WorkspaceContext, useWorkspace } from "@/context/WorkspaceContext";
+
+import { getCommandItems } from "@/core/commands";
+
 import { useFileOperations } from "@/hooks/useFileOperations";
 import { useGroups } from "@/hooks/useGroups";
 import { useHistory } from "@/hooks/useHistory";
@@ -13,29 +14,27 @@ import { useSelection } from "@/hooks/useSelection";
 
 import styles from "./Workspace.module.css";
 
-type TopBarProps = {
-  groups: UseGroupsReturn;
-  history: UseHistoryReturn;
-};
+const TopBar = () => {
+  const workspace = useWorkspace();
+  const { groups } = workspace;
 
-const TopBar = ({ groups, history }: TopBarProps) => (
-  <div className={styles.topBar}>
-    <GroupTabs
-      groups={groups.list}
-      canToggle={groups.canToggle}
-      onToggle={groups.toggleGroup}
-    />
-    <Toolbar>
-      <TextButton onClick={groups.addGroup}>new window</TextButton>
-      <TextButton onClick={history.undo} disabled={!history.canUndo}>
-        undo
-      </TextButton>
-      <TextButton onClick={history.redo} disabled={!history.canRedo}>
-        redo
-      </TextButton>
-    </Toolbar>
-  </div>
-);
+  const workspaceCommands = getCommandItems(["newWindow", "undo", "redo"], {
+    workspace,
+    entries: [],
+    selected: [],
+  });
+
+  return (
+    <div className={styles.topBar}>
+      <GroupTabs
+        groups={groups.list}
+        canToggle={groups.canToggle}
+        onToggle={groups.toggleGroup}
+      />
+      <ActionBar items={workspaceCommands} />
+    </div>
+  );
+};
 
 export const Workspace = () => {
   const groups = useGroups();
@@ -49,34 +48,21 @@ export const Workspace = () => {
   const operations = useFileOperations(groups, selection, history);
 
   return (
-    <div className={styles.workspace}>
-      <TopBar groups={groups} history={history} />
-      <div className={styles.paneGroups}>
-        {groups.list.map(
-          (group, i) =>
-            group.visible && (
-              <PaneGroup
-                key={group.id}
-                number={i + 1}
-                group={group}
-                actions={groups.actionsFor(group.id)}
-                canClose={groups.canClose}
-                canMinimise={groups.canToggle(group)}
-                selection={selection}
-                onMove={operations.move}
-                onNewFolder={operations.newFolder}
-                onRename={operations.rename}
-                onDelete={operations.remove}
-              />
-            ),
-        )}
+    <WorkspaceContext.Provider
+      value={{ groups, selection, history, operations }}
+    >
+      <div className={styles.workspace}>
+        <TopBar />
+        <div className={styles.paneGroups}>
+          {groups.list.map(
+            (group, i) =>
+              group.visible && (
+                <PaneGroup key={group.id} number={i + 1} group={group} />
+              ),
+          )}
+        </div>
+        <SelectedFiles />
       </div>
-      <SelectedFiles
-        selected={selection.entries}
-        onRemove={selection.toggle}
-        onClear={selection.clear}
-        onDelete={() => operations.remove(selection.entries)}
-      />
-    </div>
+    </WorkspaceContext.Provider>
   );
 };

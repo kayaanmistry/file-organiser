@@ -1,7 +1,7 @@
 import type { Entry } from "@/api/files";
 import type { PaneState } from "@/hooks/useGroups";
 
-import { isInside } from "./path";
+import { isInside } from "../utils/path";
 
 // true if the selected files can be moved into the pane's folder
 export const canMoveTo = (selected: Entry[], pane: PaneState) => {

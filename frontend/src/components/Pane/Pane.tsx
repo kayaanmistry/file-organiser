@@ -1,15 +1,20 @@
-import { selectFolder, type Entry } from "@/api/files";
+import type { Entry } from "@/api/files";
+import { selectFolder } from "@/api/files";
 
 import { DEFAULT_COLUMNS } from "@/components/FileTable/columns";
-import { Toolbar } from "@/components/Toolbar/Toolbar";
+import { ActionBar } from "@/components/ActionBar/ActionBar";
 import { FileTable } from "@/components/FileTable/FileTable";
 import { TextButton } from "@/components/Buttons/TextButton/TextButton";
 
 import type { PaneState } from "@/hooks/useGroups";
 import { useNaming } from "@/hooks/useNaming";
 import { useDrop } from "@/hooks/drag/useDrop";
+import { useContextMenu } from "@/hooks/menu/useContextMenu";
 
-import { canMoveTo } from "@/utils/move";
+import { useWorkspace } from "@/context/WorkspaceContext";
+
+import { canMoveTo } from "@/core/move";
+import { getCommandItems } from "@/core/commands";
 
 import styles from "./Pane.module.css";
 
@@ -25,83 +30,45 @@ const PathBar = ({ path, onSelect }: PathBarProps) => (
   </header>
 );
 
-type ActionBarProps = {
-  canCreate: boolean;
-  canSelect: boolean;
-  canDeselect: boolean;
-  canMove: boolean;
-  canDelete: boolean;
-  onNewFolder: () => void;
-  onSelectAll: () => void;
-  onDeselectAll: () => void;
-  onMove: () => void;
-  onDelete: () => void;
-};
-
-const ActionBar = ({
-  canCreate,
-  canSelect,
-  canDeselect,
-  canMove,
-  canDelete,
-  onNewFolder,
-  onSelectAll,
-  onDeselectAll,
-  onMove,
-  onDelete,
-}: ActionBarProps) => (
-  <Toolbar>
-    <TextButton onClick={onNewFolder} disabled={!canCreate}>
-      new folder
-    </TextButton>
-    <TextButton onClick={onSelectAll} disabled={!canSelect}>
-      select all
-    </TextButton>
-    <TextButton onClick={onDeselectAll} disabled={!canDeselect}>
-      clear
-    </TextButton>
-    <TextButton onClick={onMove} disabled={!canMove}>
-      move here
-    </TextButton>
-    <TextButton onClick={onDelete} disabled={!canDelete}>
-      delete
-    </TextButton>
-  </Toolbar>
-);
-
 type PaneProps = {
   pane: PaneState;
-  selected: Entry[];
-  isSelected: (entry: Entry) => boolean;
   onOpenFolder: (path: string) => void;
-  onToggle: (entry: Entry) => void;
-  onSelectAll: (entries: Entry[]) => void;
-  onDeselectAll: (entries: Entry[]) => void;
-  onMove: (entries: Entry[], destination: string) => void;
-  onNewFolder: (name: string) => void;
-  onRename: (entry: Entry, name: string) => void;
-  onDelete: (entries: Entry[]) => void;
 };
 
-export const Pane = ({
-  pane,
-  selected,
-  isSelected,
-  onOpenFolder,
-  onToggle,
-  onSelectAll,
-  onDeselectAll,
-  onMove,
-  onNewFolder,
-  onRename,
-  onDelete,
-}: PaneProps) => {
-  const naming = useNaming(pane, onNewFolder, onRename);
+export const Pane = ({ pane, onOpenFolder }: PaneProps) => {
+  const workspace = useWorkspace();
+  const { selection, operations } = workspace;
+
+  const naming = useNaming(
+    pane,
+    (name) => operations.newFolder(pane, name),
+    operations.rename,
+  );
 
   const drop = useDrop({
     entries: (entries) =>
-      canMoveTo(entries, pane) && (() => onMove(entries, pane.path!)),
+      canMoveTo(entries, pane) && (() => operations.move(entries, pane.path!)),
   });
+
+  const context = { workspace, pane, naming, openFolder: onOpenFolder };
+
+  const paneCommands = getCommandItems(
+    ["newFolder", "selectAll", "clear", "moveHere", "delete"],
+    {
+      ...context,
+      entries: pane.entries,
+      selected: selection.selectedIn(pane.entries),
+    },
+  );
+
+  const entryCommands = (entry: Entry) =>
+    getCommandItems(["open", "rename", "toggleSelect", "delete"], {
+      ...context,
+      entries: [entry],
+      selected: selection.targetsFor(entry, pane.entries),
+    });
+
+  const menu = useContextMenu(() => paneCommands);
 
   const handleSelect = async () => {
     const selectedPath = await selectFolder();
@@ -109,32 +76,24 @@ export const Pane = ({
     onOpenFolder(selectedPath);
   };
 
-  const selectedHere = pane.entries.filter(isSelected);
-  const selectedCount = selectedHere.length;
-
   return (
-    <section className={styles.pane} data-drop={drop.isOver} {...drop.props}>
+    <section
+      className={styles.pane}
+      data-drop={drop.isOver}
+      {...drop.props}
+      {...menu}
+    >
       <PathBar path={pane.path} onSelect={handleSelect} />
       <FileTable
         entries={naming.entries}
         columns={DEFAULT_COLUMNS}
-        isSelected={isSelected}
-        getDragged={(entry) => (isSelected(entry) ? selectedHere : [entry])}
+        isSelected={selection.isSelected}
+        getDragged={(entry) => selection.targetsFor(entry, pane.entries)}
         naming={naming}
-        onRowClick={onToggle}
+        onRowClick={selection.toggle}
+        getRowCommands={entryCommands}
       />
-      <ActionBar
-        canCreate={!!pane.path && !naming.isEditing}
-        canSelect={selectedCount < pane.entries.length}
-        canDeselect={selectedCount > 0}
-        canMove={canMoveTo(selected, pane)}
-        canDelete={selectedCount > 0}
-        onNewFolder={naming.startNewFolder}
-        onSelectAll={() => onSelectAll(pane.entries)}
-        onDeselectAll={() => onDeselectAll(pane.entries)}
-        onMove={() => onMove(selected, pane.path!)}
-        onDelete={() => onDelete(selectedHere)}
-      />
+      <ActionBar items={paneCommands} />
     </section>
   );
 };

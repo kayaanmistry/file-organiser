@@ -3,7 +3,10 @@ import type { Entry } from "@/api/files";
 import type { Naming } from "@/components/Name/Name";
 import { Name } from "@/components/Name/Name";
 
+import { useContextMenu } from "@/hooks/menu/useContextMenu";
 import { useDrag } from "@/hooks/drag/useDrag";
+
+import type { CommandItem } from "@/core/commands";
 
 import type { ColumnId } from "./columns";
 import { COLUMNS } from "./columns";
@@ -46,6 +49,7 @@ type EntryRowProps = {
   dragged: Entry[];
   naming?: Naming;
   onClick: () => void;
+  getCommands: () => CommandItem[];
 };
 
 const EntryRow = ({
@@ -56,10 +60,12 @@ const EntryRow = ({
   dragged,
   naming,
   onClick,
+  getCommands,
 }: EntryRowProps) => {
   const isEditing = naming?.editingPath === entry.path;
 
   const drag = useDrag({ kind: "entries", data: dragged }, !isEditing);
+  const menu = useContextMenu(isEditing ? () => [] : getCommands);
 
   return (
     <div
@@ -68,6 +74,7 @@ const EntryRow = ({
       data-selected={isSelected}
       onClick={isEditing ? undefined : onClick}
       {...drag}
+      {...menu}
     >
       {columns.map((id) => (
         <span key={id} className={styles.cell}>
@@ -81,19 +88,21 @@ const EntryRow = ({
 type FileTableProps = {
   entries: Entry[];
   columns: ColumnId[];
+  naming?: Naming;
   isSelected: (entry: Entry) => boolean;
   getDragged: (entry: Entry) => Entry[];
-  naming?: Naming;
   onRowClick?: (entry: Entry) => void;
+  getRowCommands: (entry: Entry) => CommandItem[];
 };
 
 export const FileTable = ({
   entries,
   columns,
+  naming,
   isSelected,
   getDragged,
-  naming,
   onRowClick,
+  getRowCommands,
 }: FileTableProps) => (
   <div className={styles.table}>
     <ColumnHeaders columns={columns} />
@@ -108,6 +117,7 @@ export const FileTable = ({
           dragged={getDragged(entry)}
           naming={naming}
           onClick={() => onRowClick?.(entry)}
+          getCommands={() => getRowCommands(entry)}
         />
       ))}
     </div>

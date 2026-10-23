@@ -1,11 +1,9 @@
-import type { Entry } from "@/api/files";
-
 import { Pane } from "@/components/Pane/Pane";
 import { PaneTabs } from "@/components/Pane/PaneTabs/PaneTabs";
 import { IconButton } from "@/components/Buttons/IconButton/IconButton";
 
-import type { GroupActions, GroupState, PaneState } from "@/hooks/useGroups";
-import type { UseSelectionReturn } from "@/hooks/useSelection";
+import type { GroupActions, GroupState } from "@/hooks/useGroups";
+import { useWorkspace } from "@/context/WorkspaceContext";
 import { useDrop } from "@/hooks/drag/useDrop";
 
 import styles from "./PaneGroup.module.css";
@@ -62,28 +60,12 @@ const TopBar = ({
 type PaneGroupProps = {
   number: number;
   group: GroupState;
-  actions: GroupActions;
-  canClose: boolean;
-  canMinimise: boolean;
-  selection: UseSelectionReturn;
-  onMove: (entries: Entry[], destination: string) => void;
-  onNewFolder: (target: PaneState, name: string) => void;
-  onRename: (entry: Entry, name: string) => void;
-  onDelete: (entries: Entry[]) => void;
 };
 
-export const PaneGroup = ({
-  number,
-  group,
-  actions,
-  canClose,
-  canMinimise,
-  selection,
-  onMove,
-  onNewFolder,
-  onRename,
-  onDelete,
-}: PaneGroupProps) => {
+export const PaneGroup = ({ number, group }: PaneGroupProps) => {
+  const { groups } = useWorkspace();
+
+  const actions = groups.actionsFor(group.id);
   const active = group.panes.find((pane) => pane.id === group.activeId)!;
 
   const drop = useDrop({
@@ -97,22 +79,13 @@ export const PaneGroup = ({
         number={number}
         group={group}
         actions={actions}
-        canClose={canClose}
-        canMinimise={canMinimise}
+        canClose={groups.canClose}
+        canMinimise={groups.canToggle(group)}
       />
       <Pane
         key={active.id}
         pane={active}
-        selected={selection.entries}
-        isSelected={selection.isSelected}
         onOpenFolder={(path) => actions.openFolder(active.id, path)}
-        onToggle={selection.toggle}
-        onSelectAll={selection.add}
-        onDeselectAll={selection.remove}
-        onMove={onMove}
-        onNewFolder={(name) => onNewFolder(active, name)}
-        onRename={onRename}
-        onDelete={onDelete}
       />
     </div>
   );

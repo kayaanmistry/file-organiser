@@ -1,59 +1,49 @@
 import type { Entry } from "@/api/files";
 
-import { TextButton } from "@/components/Buttons/TextButton/TextButton";
+import { useWorkspace } from "@/context/WorkspaceContext";
+
+import { ActionBar } from "@/components/ActionBar/ActionBar";
 import { FileTable } from "@/components/FileTable/FileTable";
 import { SELECTED_COLUMNS } from "@/components/FileTable/columns";
-import { Toolbar } from "@/components/Toolbar/Toolbar";
+
+import { useContextMenu } from "@/hooks/menu/useContextMenu";
+
+import { getCommandItems } from "@/core/commands";
 
 import styles from "./SelectedFiles.module.css";
 
-type ActionBarProps = {
-  hasSelection: boolean;
-  onDeselectAll: () => void;
-  onDelete: () => void;
+export const SelectedFiles = () => {
+  const workspace = useWorkspace();
+  const { selection } = workspace;
+  const selected = selection.entries;
+
+  const selectedCommands = getCommandItems(["clear", "delete"], {
+    workspace,
+    entries: selected,
+    selected,
+  });
+
+  const entryCommands = (entry: Entry) =>
+    getCommandItems(["toggleSelect", "delete"], {
+      workspace,
+      entries: [entry],
+      selected: [entry],
+    });
+
+  const menu = useContextMenu(() => selectedCommands);
+
+  return (
+    <section className={styles.selectedFiles} {...menu}>
+      <p className={styles.title}>Selected Files</p>
+      <FileTable
+        entries={selected}
+        columns={SELECTED_COLUMNS}
+        isSelected={() => false}
+        getDragged={() => selected}
+        onRowClick={selection.toggle}
+        getRowCommands={entryCommands}
+      />
+      <ActionBar items={selectedCommands} />
+    </section>
+  );
 };
-
-const ActionBar = ({
-  hasSelection,
-  onDeselectAll,
-  onDelete,
-}: ActionBarProps) => (
-  <Toolbar>
-    <TextButton onClick={onDeselectAll} disabled={!hasSelection}>
-      clear
-    </TextButton>
-    <TextButton onClick={onDelete} disabled={!hasSelection}>
-      delete
-    </TextButton>
-  </Toolbar>
-);
-
-type SelectedFilesProps = {
-  selected: Entry[];
-  onRemove: (entry: Entry) => void;
-  onClear: () => void;
-  onDelete: () => void;
-};
-
-export const SelectedFiles = ({
-  selected,
-  onRemove,
-  onClear,
-  onDelete,
-}: SelectedFilesProps) => (
-  <section className={styles.selectedFiles}>
-    <p className={styles.title}>Selected Files</p>
-    <FileTable
-      entries={selected}
-      columns={SELECTED_COLUMNS}
-      isSelected={() => false}
-      getDragged={() => selected}
-      onRowClick={onRemove}
-    />
-    <ActionBar
-      hasSelection={selected.length > 0}
-      onDeselectAll={onClear}
-      onDelete={onDelete}
-    />
-  </section>
-);

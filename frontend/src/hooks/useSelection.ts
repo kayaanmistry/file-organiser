@@ -7,6 +7,10 @@ export const useSelection = () => {
 
   const paths = new Set(selected.map((e) => e.path));
   const isSelected = (entry: Entry) => paths.has(entry.path);
+  const selectedIn = (entries: Entry[]) => entries.filter(isSelected);
+
+  const targetsFor = (entry: Entry, entries: Entry[]) =>
+    isSelected(entry) ? selectedIn(entries) : [entry];
 
   const toggle = (entry: Entry) => {
     setSelected((current) => {
@@ -32,7 +36,16 @@ export const useSelection = () => {
 
   const clear = () => setSelected([]);
 
-  return { entries: selected, isSelected, toggle, add, remove, clear };
+  return {
+    entries: selected,
+    isSelected,
+    selectedIn,
+    targetsFor,
+    toggle,
+    add,
+    remove,
+    clear,
+  };
 };
 
 export type UseSelectionReturn = ReturnType<typeof useSelection>;
