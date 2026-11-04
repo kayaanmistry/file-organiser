@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install Python deps
+        working-directory: backend
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Build app (Windows)
+        if: runner.os == 'Windows'
+        working-directory: backend
+        run: |
+          pyinstaller --noconfirm --onefile --windowed --name "File Organiser" --add-data "../frontend/dist:dist" main.py
+          Move-Item "dist/File Organiser.exe" "dist/File-Organiser-Windows.exe"
+
+      - name: Build app (macOS)
+        if: runner.os == 'macOS'
+        working-directory: backend
+        run: |
+          pyinstaller --noconfirm --windowed --name "File Organiser" --add-data "../frontend/dist:dist" main.py
+          ditto -c -k --keepParent "dist/File Organiser.app" "dist/File-Organiser-macOS.zip"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          repository: kayaanmistry/file-organiser-releases
+          token: ${{ secrets.RELEASE_TOKEN }}
+          files: |
+            backend/dist/*.exe
+            backend/dist/*.zip
